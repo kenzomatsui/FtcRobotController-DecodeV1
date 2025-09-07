@@ -80,7 +80,6 @@ public class FieldOrientedDrive {
     // Potencia: A potência a ser aplicada aos motores para o movimento de strafe.
     public void Strafe(double Potencia){
         // Define a potência para cada motor para realizar o movimento de strafe.
-        // As potências são ajustadas para que as rodas opostas girem em direções opostas, criando o movimento lateral.
         leftFront.setPower(-Potencia);
         rightFront.setPower(-Potencia);
         leftBack.setPower(Potencia);
