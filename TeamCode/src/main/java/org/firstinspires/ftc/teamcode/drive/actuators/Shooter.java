@@ -5,16 +5,19 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp
-public class Motor extends OpMode {
+public class Shooter extends OpMode {
 
-    DcMotor motor;
+    DcMotor motorbaixo;
+    DcMotor motoralto;
 
     @Override
     public void init() {
-        motor = hardwareMap.get(DcMotor.class, "motor");
+        motorbaixo = hardwareMap.get(DcMotor.class, "motorb");
+        motoralto = hardwareMap.get(DcMotor.class, "motora");
     }
     public void loop(){
         double power = gamepad1.left_stick_y;
-        motor.setPower(power);
+        motorbaixo.setPower(power);
+        motoralto.setPower(power);
     }
 }
