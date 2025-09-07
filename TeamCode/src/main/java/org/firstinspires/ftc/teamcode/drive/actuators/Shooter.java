@@ -3,21 +3,20 @@ package org.firstinspires.ftc.teamcode.drive.actuators;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 @TeleOp
-public class Shooter extends OpMode {
+public class Shooter{
 
     DcMotor motorbaixo;
     DcMotor motoralto;
 
-    @Override
-    public void init() {
+    public Shooter(HardwareMap hardwareMap) {
         motorbaixo = hardwareMap.get(DcMotor.class, "motorb");
         motoralto = hardwareMap.get(DcMotor.class, "motora");
     }
-    public void loop(){
-        double power = gamepad1.left_stick_y;
+    public void Shoot(double power){
         motorbaixo.setPower(power);
-        motoralto.setPower(power);
+        motoralto.setPower(-power);
     }
 }
