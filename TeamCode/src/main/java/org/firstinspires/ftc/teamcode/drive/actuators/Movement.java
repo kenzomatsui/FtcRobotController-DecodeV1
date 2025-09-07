@@ -12,25 +12,18 @@ public class Movement extends OpMode {
     DcMotor backRight;
     DcMotor frontLeft;
     DcMotor frontRight;
-    Servo lright;
-    Servo lleft;
+
     @Override
     public void init() {
-        lright = hardwareMap.get(Servo.class,"lright");
-        lleft = hardwareMap.get(Servo.class,"lleft");
-
-        lright.setPosition(1);
-        lleft.setPosition(0.1);
-
-        backLeft = hardwareMap.dcMotor.get("odor");
-        backRight = hardwareMap.dcMotor.get("odom");
-        frontLeft = hardwareMap.dcMotor.get("odol");
+        backLeft = hardwareMap.dcMotor.get("BL");
+        backRight = hardwareMap.dcMotor.get("BR");
+        frontLeft = hardwareMap.dcMotor.get("FL");
         frontRight = hardwareMap.dcMotor.get("FR");
 
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //Reversão de valores
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
