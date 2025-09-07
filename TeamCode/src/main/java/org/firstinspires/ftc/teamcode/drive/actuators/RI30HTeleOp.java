@@ -14,6 +14,6 @@ public class RI30HTeleOp extends OpMode {
     }
     public void loop(){
         fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, -gamepad1.right_stick_x, gamepad1.right_trigger, gamepad1.left_bumper);
-        shooter.Shoot(gamepad1.left_trigger);
+        shooter.Shoot(-gamepad1.left_trigger);
     }
 }

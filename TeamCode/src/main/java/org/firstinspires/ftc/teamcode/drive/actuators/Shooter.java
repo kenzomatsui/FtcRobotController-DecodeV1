@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-@TeleOp
+
 public class Shooter{
 
     DcMotor motorbaixo;
@@ -17,6 +17,6 @@ public class Shooter{
     }
     public void Shoot(double power){
         motorbaixo.setPower(power);
-        motoralto.setPower(-power);
+        motoralto.setPower(power);
     }
 }

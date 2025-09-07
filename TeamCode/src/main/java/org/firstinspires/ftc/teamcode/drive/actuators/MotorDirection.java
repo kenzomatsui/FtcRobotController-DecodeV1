@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.drive.actuators;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
+@TeleOp
 public class MotorDirection extends OpMode {
     DcMotor backLeft;
     DcMotor backRight;
@@ -23,6 +24,7 @@ public class MotorDirection extends OpMode {
         //Reversão de valores
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         telemetry.addData("Hardware: ", "Initialized");
         telemetry.addData("Status: ", "Initialized");
