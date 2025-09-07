@@ -50,18 +50,12 @@ public class FieldOrientedDrive {
         imu.initialize(parameters);
     }
 
-    // Método para controlar o movimento do robô com base nas entradas do joystick e na orientação do campo.
-    // lx: entrada do joystick esquerdo no eixo x (movimento lateral).
-    // ly: entrada do joystick esquerdo no eixo y (movimento para frente/trás).
-    // rx: entrada do joystick direito no eixo x (rotação).
-    // drivepower: um fator para escalar a potência geral do inversor.
-    // resetIMU: se verdadeiro, a guinada da IMU será redefinida para a orientação atual do robô.
     public void movement(double lx, double ly, double rx, double drivepower, boolean resetIMU) {
 
-        // Calcula o valor máximo absoluto das entradas do joystick para normalização, garantindo que nenhuma potência exceda 1.
+        // Calcula o valor máximo absoluto das entradas do joystick, garantindo que nenhuma potência exceda 1.
         double max = Math.max(Math.abs(lx) + Math.abs(ly) + Math.abs(rx), 1);
 
-        // Calcula a potência de condução ajustada, permitindo uma redução da velocidade máxima (freio).
+        // Calcula a potência ajustada, permitindo uma redução da velocidade máxima.
         double drivePower = 1 - (0.5 * drivepower);
 
         // Se resetIMU for verdadeiro, redefine a guinada (yaw) da IMU para a orientação atual do robô.
@@ -83,7 +77,6 @@ public class FieldOrientedDrive {
         rightBack.setPower(((adjustedLy + adjustedLx - rx) / max) * drivePower);
     }
 
-    // Método para mover o robô lateralmente (strafe) com uma potência específica.
     // Potencia: A potência a ser aplicada aos motores para o movimento de strafe.
     public void Strafe(double Potencia){
         // Define a potência para cada motor para realizar o movimento de strafe.
