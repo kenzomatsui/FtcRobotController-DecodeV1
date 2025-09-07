@@ -1,4 +1,3 @@
-teste 1 
 ## NOTICE 
 git push -u origin main
 This repository contains the public FTC SDK for the DECODE (2025-2026) competition season.
