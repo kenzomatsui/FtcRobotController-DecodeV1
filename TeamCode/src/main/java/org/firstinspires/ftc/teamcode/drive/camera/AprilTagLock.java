@@ -2,55 +2,78 @@ package org.firstinspires.ftc.teamcode.drive.camera;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+@TeleOp
+public class AprilTagLock extends LinearOpMode {
 
-public class AprilTagLock extends OpMode {
-    Limelight3A limelight;
-    IMU imu;
-    DcMotor motor;
+    private Limelight3A limelight;
+    private DcMotor leftMotor = null;
+    private DcMotor rightMotor = null;
+
+    // Motor control constants
+    private static final double DRIVE_SPEED = 0.2; // Adjust as needed
+    private static final double TURN_SPEED = 0.1;  // Adjust as needed
+    private static final double TOLERANCE = 0.5;   // degrees, adjust as needed
 
     @Override
-    public void init() {
+    public void runOpMode() {
+        // Initialize Limelight
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(100); // Isso define com que frequência pedimos dados ao Limelight (100 vezes por segundo)
-        limelight.start(); // Isso diz ao Limelight para começar a procurar!
-        limelight.pipelineSwitch(7); // Mudar para o pipeline número 7
+        limelight.setPollRateHz(100); // Set how often we ask Limelight for data (100 times per second)
+        limelight.start(); // Tell Limelight to start looking!
 
-        // Mapeia a IMU do arquivo de configuração de hardware do robô.
-        imu = hardwareMap.get(IMU.class, "imu");
-        // Define os parâmetros de inicialização da IMU, especificando a orientação física do hub Rev no robô.
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT
-        ));
-        // Inicializa a IMU com os parâmetros definidos.
-        imu.initialize(parameters);
+        // Initialize motors (adjust names as per your robot's configuration)
+        leftMotor = hardwareMap.get(DcMotor.class, "left_motor");
+        rightMotor = hardwareMap.get(DcMotor.class, "right_motor");
 
-        //Declaração do HM do motor da plataforma
-        motor = hardwareMap.get(DcMotor.class,"motor");
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    public void loop(){
+        // Most robots will need to reverse one motor
+        leftMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        LLResult result = limelight.getLatestResult();
-        double robotYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        limelight.updateRobotOrientation(robotYaw);
-        if (result != null && result.isValid()) {
-            Pose3D botpose_mt2 = result.getBotpose_MT2();
-            double tx = result.getTx();
-            if (botpose_mt2 != null) {
-                double x = botpose_mt2.getPosition().x * 1000;
-                double y = botpose_mt2.getPosition().y * 1000;
-                telemetry.addData("MT2 Location:", "(" + x + ", " + y + ")");
+        // Set motor modes
+        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-             }
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+            LLResult result = limelight.getLatestResult();
+
+            if (result != null && result.isValid()) {
+                double tx = result.getTx(); // Horizontal Offset From Crosshair To Target (degrees)
+                // double ty = result.getTy(); // Vertical Offset From Crosshair To Target (degrees) - Not used for horizontal alignment
+
+                double error = -tx; // Error is negative of tx for aligning to center (0 degrees)
+
+                if (Math.abs(error) > TOLERANCE) {
+                    // Proportional control for turning
+                    double turn = error * TURN_SPEED; // Simple proportional control
+                    leftMotor.setPower(turn);
+                    rightMotor.setPower(-turn);
+                    telemetry.addData("Status", "Turning");
+                } else {
+                    // Aligned horizontally, stop turning
+                    leftMotor.setPower(0);
+                    rightMotor.setPower(0);
+                    telemetry.addData("Status", "Alinhado!");
+                }
+                telemetry.addData("Target X", tx);
+                telemetry.addData("Error", error);
+            } else {
+                // No target visible, stop motors
+                leftMotor.setPower(0);
+                rightMotor.setPower(0);
+                telemetry.addData("Status", "No Targets");
+            }
+            telemetry.update();
         }
     }
 }
+
 
