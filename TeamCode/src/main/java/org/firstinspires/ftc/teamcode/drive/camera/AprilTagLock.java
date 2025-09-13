@@ -10,13 +10,20 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class AprilTagLock extends LinearOpMode {
 
     private Limelight3A limelight;
-    private DcMotor leftMotor = null;
-    private DcMotor rightMotor = null;
+    private DcMotor rotationMotor = null; // Single motor for rotation
 
-    // Motor control constants
-    private static final double DRIVE_SPEED = 0.2; // Adjust as needed
-    private static final double TURN_SPEED = 0.1;  // Adjust as needed
+    // PID Constants - These will need to be tuned for your specific robot
+    private static final double Kp = 0.05; // Proportional constant
+    private static final double Ki = 0.00; // Integral constant (start with 0, add if needed)
+    private static final double Kd = 0.003; // Derivative constant (start with small value)
+
     private static final double TOLERANCE = 0.5;   // degrees, adjust as needed
+    private static final double MAX_POWER = 0.5;   // Maximum motor power to apply
+
+    // PID variables
+    private double integral = 0;
+    private double lastError = 0;
+    private long lastTime = 0;
 
     @Override
     public void runOpMode() {
@@ -25,55 +32,66 @@ public class AprilTagLock extends LinearOpMode {
         limelight.setPollRateHz(100); // Set how often we ask Limelight for data (100 times per second)
         limelight.start(); // Tell Limelight to start looking!
 
-        // Initialize motors (adjust names as per your robot's configuration)
-        leftMotor = hardwareMap.get(DcMotor.class, "left_motor");
-        rightMotor = hardwareMap.get(DcMotor.class, "right_motor");
+        // Initialize the single rotation motor
+        rotationMotor = hardwareMap.get(DcMotor.class, "RM"); // Adjust name as per your robot's configuration
 
-        // Most robots will need to reverse one motor
-        leftMotor.setDirection(DcMotor.Direction.REVERSE);
-        rightMotor.setDirection(DcMotor.Direction.FORWARD);
+        // Set motor direction if needed (e.g., if positive power turns it the wrong way)
+        rotationMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        // Set motor modes
-        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        // Set motor mode
+        rotationMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
 
+        lastTime = System.currentTimeMillis();
+
         while (opModeIsActive()) {
             LLResult result = limelight.getLatestResult();
 
             if (result != null && result.isValid()) {
                 double tx = result.getTx(); // Horizontal Offset From Crosshair To Target (degrees)
-                // double ty = result.getTy(); // Vertical Offset From Crosshair To Target (degrees) - Not used for horizontal alignment
 
                 double error = -tx; // Error is negative of tx for aligning to center (0 degrees)
 
+                long currentTime = System.currentTimeMillis();
+                double deltaTime = (currentTime - lastTime) / 1000.0; // Convert to seconds
+
+                // Calculate PID components
+                integral += error * deltaTime;
+                double derivative = (error - lastError) / deltaTime;
+
+                // Calculate total power
+                double power = Kp * error + Ki * integral + Kd * derivative;
+
+                // Clamp power to max_power
+                power = Math.max(-MAX_POWER, Math.min(power, MAX_POWER));
+
                 if (Math.abs(error) > TOLERANCE) {
-                    // Proportional control for turning
-                    double turn = error * TURN_SPEED; // Simple proportional control
-                    leftMotor.setPower(turn);
-                    rightMotor.setPower(-turn);
-                    telemetry.addData("Status", "Turning");
+                    rotationMotor.setPower(power);
+                    telemetry.addData("Status", "Adjusting");
                 } else {
-                    // Aligned horizontally, stop turning
-                    leftMotor.setPower(0);
-                    rightMotor.setPower(0);
+                    rotationMotor.setPower(0);
                     telemetry.addData("Status", "Alinhado!");
+                    integral = 0; // Reset integral when aligned to prevent wind-up
                 }
                 telemetry.addData("Target X", tx);
                 telemetry.addData("Error", error);
+                telemetry.addData("Power", power);
+
+                lastError = error;
+                lastTime = currentTime;
+
             } else {
-                // No target visible, stop motors
-                leftMotor.setPower(0);
-                rightMotor.setPower(0);
+                // No target visible, stop motor and reset PID
+                rotationMotor.setPower(0);
                 telemetry.addData("Status", "No Targets");
+                integral = 0;
+                lastError = 0;
             }
             telemetry.update();
         }
     }
 }
-
-
