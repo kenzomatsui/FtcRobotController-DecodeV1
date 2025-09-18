@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.drive.camera;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+@Config
 @TeleOp
 public class AprilTagLock extends LinearOpMode {
 
@@ -13,9 +15,9 @@ public class AprilTagLock extends LinearOpMode {
     private DcMotor rotationMotor = null; // Single motor for rotation
 
     // PID Constants - These will need to be tuned for your specific robot
-    private static final double Kp = 0.05; // Proportional constant
-    private static final double Ki = 0.00; // Integral constant (start with 0, add if needed)
-    private static final double Kd = 0.003; // Derivative constant (start with small value)
+    public static double Kp = 0.02; // Proportional constant
+    public static double Ki = 0.00; // Integral constant (start with 0, add if needed)
+    public static double Kd = 0.001; // Derivative constant (start with small value)
 
     private static final double TOLERANCE = 0.5;   // degrees, adjust as needed
     private static final double MAX_POWER = 0.5;   // Maximum motor power to apply
@@ -31,6 +33,7 @@ public class AprilTagLock extends LinearOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100); // Set how often we ask Limelight for data (100 times per second)
         limelight.start(); // Tell Limelight to start looking!
+        limelight.pipelineSwitch(7);
 
         // Initialize the single rotation motor
         rotationMotor = hardwareMap.get(DcMotor.class, "RM"); // Adjust name as per your robot's configuration
