@@ -15,17 +15,17 @@ public class PIDY extends LinearOpMode {
     private DcMotor rotationMotorY = null; // Single motor for rotation X
 
     // PID Constants - These will need to be tuned for your specific robot
-    public static double Kp = 0.02; // Proportional constant
-    public static double Ki = 0.00; // Integral constant (start with 0, add if needed)
-    public static double Kd = 0.001; // Derivative constant (start with small value)
+    public static double YKp = 0.02; // Proportional constant
+    public static double YKi = 0.00; // Integral constant (start with 0, add if needed)
+    public static double YKd = 0.003; // Derivative constant (start with small value)
 
-    private static final double TOLERANCE = 0.5;   // degrees, adjust as needed
-    private static final double MAX_POWER = 0.5;   // Maximum motor power to apply
+    private static final double YTOLERANCE = 0.5;   // degrees, adjust as needed
+    private static final double YMAX_POWER = 0.5;   // Maximum motor power to apply
 
     // PID variables
-    private double integral = 0;
-    private double lastError = 0;
-    private long lastTime = 0;
+    private double Yintegral = 0;
+    private double YlastError = 0;
+    private long YlastTime = 0;
 
     @Override
     public void runOpMode() {
@@ -36,7 +36,7 @@ public class PIDY extends LinearOpMode {
         limelight.pipelineSwitch(7);
 
         // Initialize the single rotation motor
-        rotationMotorY = hardwareMap.get(DcMotor.class, "RMX"); // Adjust name as per your robot's configuration
+        rotationMotorY = hardwareMap.get(DcMotor.class, "RMY"); // Adjust name as per your robot's configuration
 
         // Set motor direction if needed (e.g., if positive power turns it the wrong way)
         rotationMotorY.setDirection(DcMotor.Direction.FORWARD);
@@ -49,7 +49,7 @@ public class PIDY extends LinearOpMode {
 
         waitForStart();
 
-        lastTime = System.currentTimeMillis();
+        YlastTime = System.currentTimeMillis();
 
         while (opModeIsActive()) {
             LLResult result = limelight.getLatestResult();
@@ -57,42 +57,42 @@ public class PIDY extends LinearOpMode {
             if (result != null && result.isValid()) {
                 double ty = result.getTy(); // Horizontal Offset From Crosshair To Target (degrees)
 
-                double error = -ty; // Error is negative of tx for aligning to center (0 degrees)
+                double Yerror = -ty; // Error is negative of tx for aligning to center (0 degrees)
 
                 long currentTime = System.currentTimeMillis();
-                double deltaTime = (currentTime - lastTime) / 1000.0; // Convert to seconds
+                double deltaTime = (currentTime - YlastTime) / 1000.0; // Convert to seconds
 
                 // Calculate PID components
-                integral += error * deltaTime;
-                double derivative = (error - lastError) / deltaTime;
+                Yintegral += Yerror * deltaTime;
+                double Yderivative = (Yerror - YlastError) / deltaTime;
 
                 // Calculate total power
-                double power = Kp * error + Ki * integral + Kd * derivative;
+                double Ypower = YKp * Yerror + YKi * Yintegral + YKd * Yderivative;
 
                 // Clamp power to max_power
-                power = Math.max(-MAX_POWER, Math.min(power, MAX_POWER));
+                Ypower = Math.max(-YMAX_POWER, Math.min(Ypower, YMAX_POWER));
 
-                if (Math.abs(error) > TOLERANCE) {
-                    rotationMotorY.setPower(power);
+                if (Math.abs(Yerror) > YTOLERANCE) {
+                    rotationMotorY.setPower(Ypower);
                     telemetry.addData("Status", "Adjusting");
                 } else {
                     rotationMotorY.setPower(0);
                     telemetry.addData("Status", "Alinhado!");
-                    integral = 0; // Reset integral when aligned to prevent wind-up
+                    Yintegral = 0; // Reset integral when aligned to prevent wind-up
                 }
                 telemetry.addData("Target X", ty);
-                telemetry.addData("Error", error);
-                telemetry.addData("Power", power);
+                telemetry.addData("Error", Yerror);
+                telemetry.addData("Power", Ypower);
 
-                lastError = error;
-                lastTime = currentTime;
+                YlastError = Yerror;
+                YlastTime = currentTime;
 
             } else {
                 // No target visible, stop motor and reset PID
                 rotationMotorY.setPower(0);
                 telemetry.addData("Status", "No Targets");
-                integral = 0;
-                lastError = 0;
+                Yintegral = 0;
+                YlastError = 0;
             }
             telemetry.update();
         }
