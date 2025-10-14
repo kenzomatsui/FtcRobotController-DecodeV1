@@ -12,7 +12,7 @@ public class TesteShooter extends OpMode {
     @Override
     public void init() {
         // nome do motor deve ser igual ao configurado no Driver Hub
-        motor = hardwareMap.get(DcMotor.class, "motor1");
+        motor = hardwareMap.get(DcMotor.class, "RMTa");
         telemetry.addData("Status", "Inicializado");
     }
 
