@@ -15,7 +15,7 @@ public class PIDTa extends LinearOpMode {
     private DcMotor driveMotor = null; // Motor que vai acelerar conforme a distância
 
     // Parâmetros ajustáveis no Dashboard
-    public static double MIN_POWER = 0;   // Potência mínima
+    public static double MIN_POWER = 0.3;   // Potência mínima
     public static double MAX_POWER = 1;   // Potência máxima
     public static double TARGET_TA = 5.0;   // "Área" esperada quando estiver na distância ideal
     public static double SCALE_FACTOR = 0.15; // Ajuste da curva de resposta
