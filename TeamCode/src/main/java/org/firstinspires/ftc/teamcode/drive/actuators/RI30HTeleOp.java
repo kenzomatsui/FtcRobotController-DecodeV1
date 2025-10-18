@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.drive.actuators;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.drive.objects.FieldOrientedDrive;
+import org.firstinspires.ftc.teamcode.drive.objects.Shooter;
+
 @TeleOp(name = "Teleop RI30H")
 public class RI30HTeleOp extends OpMode {
     // Declaração de um objeto Shooter, que controla o mecanismo de disparo do robô.
