@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode.drive.actuators;
 
 import static com.qualcomm.robotcore.hardware.Servo.MIN_POSITION;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+@Disabled
 @TeleOp
 public class ViperSlide extends OpMode{
     DcMotor poliaright;
