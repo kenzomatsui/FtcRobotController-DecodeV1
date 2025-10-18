@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.drive.camera;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
 
+@Disabled
 @Autonomous
 public class TelemetryLL extends OpMode {
     Limelight3A limelight;
