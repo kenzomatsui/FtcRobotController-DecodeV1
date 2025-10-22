@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-@Disabled
 @TeleOp
 public class Movement extends OpMode {
     DcMotor backLeft;
@@ -21,10 +20,10 @@ public class Movement extends OpMode {
         frontLeft = hardwareMap.dcMotor.get("FL");
         frontRight = hardwareMap.dcMotor.get("FR");
 
-        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //Reversão de valores
         backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -42,7 +41,7 @@ public class Movement extends OpMode {
     private void anda(){
         double forward = gamepad2.left_stick_y;
         double strafe = -gamepad2.left_stick_x;
-        double turn = -gamepad2.right_stick_x;
+        double turn = gamepad2.right_stick_x;
 
         double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(turn), 1.5);
 
