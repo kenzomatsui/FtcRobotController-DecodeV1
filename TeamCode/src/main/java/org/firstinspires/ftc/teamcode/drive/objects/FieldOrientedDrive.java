@@ -30,7 +30,6 @@ public class FieldOrientedDrive {
         // Define a direção dos motores esquerdos para REVERSE, o que é comum para garantir que todos os motores girem na direção correta para o movimento.
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
-        rightFront.setDirection(DcMotor.Direction.REVERSE);
 
         // Cria um objeto Deadline para limitar a taxa de atualização do gamepad (não usado diretamente no movimento, mas pode ser para outras funções).
         Deadline gamepadRateLimit = new Deadline(500, TimeUnit.MILLISECONDS);
@@ -39,7 +38,7 @@ public class FieldOrientedDrive {
         imu = hardwareMap.get(IMU.class, "imu");
         // Define os parâmetros de inicialização da IMU, especificando a orientação física do hub Rev no robô.
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT
         ));
         // Inicializa a IMU com os parâmetros definidos.
@@ -71,15 +70,6 @@ public class FieldOrientedDrive {
         leftBack.setPower(((adjustedLy - adjustedLx + rx) / max) * drivePower);
         rightFront.setPower(((adjustedLy - adjustedLx - rx) / max) * drivePower);
         rightBack.setPower(((adjustedLy + adjustedLx - rx) / max) * drivePower);
-    }
-
-    // Potencia: A potência a ser aplicada aos motores para o movimento de strafe.
-    public void Strafe(double Potencia){
-        // Define a potência para cada motor para realizar o movimento de strafe.
-        leftFront.setPower(-Potencia);
-        rightFront.setPower(-Potencia);
-        leftBack.setPower(Potencia);
-        rightBack.setPower(Potencia);
     }
 }
 
