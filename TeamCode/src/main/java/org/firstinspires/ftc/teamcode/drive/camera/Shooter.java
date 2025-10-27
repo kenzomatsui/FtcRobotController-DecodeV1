@@ -9,10 +9,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 @Config
 @TeleOp
-public class PIDY extends LinearOpMode {
+public class Shooter extends LinearOpMode {
 
     private Limelight3A limelight;
     private DcMotor rotationMotorY = null; // Single motor for rotation X
+    private DcMotor driveMotor = null; // Motor que vai acelerar conforme a distância
+
 
     // PID Constants - These will need to be tuned for your specific robot
     public static double YKp = 0.02; // Proportional constant
@@ -26,6 +28,10 @@ public class PIDY extends LinearOpMode {
     private double Yintegral = 0;
     private double YlastError = 0;
     private long YlastTime = 0;
+    public static double MIN_POWER = 0.35;   // Potência mínima
+    public static double MAX_POWER = 1;   // Potência máxima
+    public static double TARGET_TA = 5.0;   // "Área" esperada quando estiver na distância ideal
+    public static double SCALE_FACTOR = 0.084; // Ajuste da curva de resposta
 
     @Override
     public void runOpMode() {
@@ -43,6 +49,10 @@ public class PIDY extends LinearOpMode {
 
         // Set motor mode
         rotationMotorY.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        driveMotor = hardwareMap.get(DcMotor.class, "RMTa"); // Ajuste o nome
+        driveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driveMotor.setDirection(DcMotor.Direction.FORWARD);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -70,7 +80,18 @@ public class PIDY extends LinearOpMode {
                 double Ypower = YKp * Yerror + YKi * Yintegral + YKd * Yderivative;
 
                 // Clamp power to max_power
-                Ypower = (Math.max(-YMAX_POWER, Math.min(Ypower, YMAX_POWER))) * 4;
+                Ypower = (Math.max(-YMAX_POWER, Math.min(Ypower, YMAX_POWER))) * 3;
+
+                double ta = result.getTa(); // Área da AprilTag (relacionada à distância)
+
+                // Calcula o erro relativo à área desejada
+                double distanceError = TARGET_TA - ta;
+
+                // Quanto menor a área (mais longe), maior o erro => mais potência
+                double power = MIN_POWER + (distanceError * SCALE_FACTOR);
+
+                // Limita entre os valores mínimos e máximos
+                power = Math.max(MIN_POWER, Math.min(power, MAX_POWER));
 
                 if (Math.abs(Yerror) > YTOLERANCE) {
                     rotationMotorY.setPower(Ypower);
@@ -86,6 +107,16 @@ public class PIDY extends LinearOpMode {
 
                 YlastError = Yerror;
                 YlastTime = currentTime;
+                if (ta >= TARGET_TA) {
+                    driveMotor.setPower(0);
+                    telemetry.addData("Status", "Distância ideal ou muito perto");
+                } else {
+                    driveMotor.setPower(power);
+                    telemetry.addData("Status", "Aproximando...");
+                }
+                telemetry.addData("Área (ta)", ta);
+                telemetry.addData("Erro de distância", distanceError);
+                telemetry.addData("Potência aplicada", power);
 
             } else {
                 // No target visible, stop motor and reset PID
@@ -93,6 +124,7 @@ public class PIDY extends LinearOpMode {
                 telemetry.addData("Status", "No Targets");
                 Yintegral = 0;
                 YlastError = 0;
+                driveMotor.setPower(0);
             }
             telemetry.update();
         }
