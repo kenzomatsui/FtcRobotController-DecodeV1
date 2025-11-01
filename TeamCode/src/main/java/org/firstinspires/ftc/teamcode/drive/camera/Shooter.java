@@ -3,13 +3,21 @@ package org.firstinspires.ftc.teamcode.drive.camera;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @TeleOp
 public class Shooter extends LinearOpMode {
+
+    public static double distancia = 110;
+    private DistanceSensor sensorDistance;
+    private DcMotor Motor;
 
     private Limelight3A limelight;
     private DcMotor rotationMotorY = null; // Single motor for rotation X
@@ -54,7 +62,15 @@ public class Shooter extends LinearOpMode {
         driveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         driveMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        telemetry.addData("Status", "Initialized");
+        // you can use this as a regular DistanceSensor.
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
+        Motor = hardwareMap.get(DcMotor.class, "index");
+
+        // you can also cast this to a Rev2mDistanceSensor if you want to use added
+        // methods associated with the Rev2mDistanceSensor class.
+        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
+
+        telemetry.addData(">>", "Press start to continue");
         telemetry.update();
 
         waitForStart();
@@ -63,6 +79,19 @@ public class Shooter extends LinearOpMode {
 
         while (opModeIsActive()) {
             LLResult result = limelight.getLatestResult();
+            boolean isDetected = false;
+
+            if(sensorDistance.getDistance(DistanceUnit.MM) < distancia){
+                isDetected = true;
+                Motor.setPower(0);
+            }else{
+                Motor.setPower(0.5);
+            }
+
+            telemetry.addData("Bola identificada: ", isDetected);
+            // generic DistanceSensor methods.
+            telemetry.addData("range", String.format("%.01f mm", sensorDistance.getDistance(DistanceUnit.MM)));
+
 
             if (result != null && result.isValid()) {
                 double ty = result.getTy(); // Horizontal Offset From Crosshair To Target (degrees)
