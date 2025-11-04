@@ -20,11 +20,8 @@ public class TesteMotor extends OpMode {
     @Override
     public void loop() {
         // controlado pelo gatilho direito e esquerdo do gamepad
-        double power = gamepad1.right_trigger - gamepad1.left_trigger;
+        double power = gamepad1.right_trigger;
         motor.setPower(power);
-        if (gamepad1.a){
-            motor.setPower(0.7);
-        }
 
         telemetry.addData("Potência", power);
         telemetry.update();

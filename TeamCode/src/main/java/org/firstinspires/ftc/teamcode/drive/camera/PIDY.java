@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.drive.camera;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @Config
 @TeleOp
+@Disabled
 public class PIDY extends LinearOpMode {
 
     private Limelight3A limelight;
@@ -70,7 +72,7 @@ public class PIDY extends LinearOpMode {
                 double Ypower = YKp * Yerror + YKi * Yintegral + YKd * Yderivative;
 
                 // Clamp power to max_power
-                Ypower = (Math.max(-YMAX_POWER, Math.min(Ypower, YMAX_POWER))) * 4;
+                Ypower = (Math.max(-YMAX_POWER, Math.min(Ypower, YMAX_POWER))) * 3;
 
                 if (Math.abs(Yerror) > YTOLERANCE) {
                     rotationMotorY.setPower(Ypower);
