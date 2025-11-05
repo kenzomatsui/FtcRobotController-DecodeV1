@@ -9,171 +9,153 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-@TeleOp(name="Shooter com Limelight", group="Vision")
+@TeleOp
 public class Shooter extends LinearOpMode {
 
-    private Limelight3A limelight;
-    private org.firstinspires.ftc.teamcode.drive.objects.Shooter shooter;
+    public static double distancia = 110;
     private DistanceSensor sensorDistance;
     private DcMotor Motor;
 
-    // --- PARÂMETROS DE CALIBRAÇÃO (MUDAR CONFORME SEU ROBÔ) ---
-    private static final double CAMERA_HEIGHT_M = 0.33; // Altura da câmera em metros
-    private static final double CAMERA_ANGLE_DEG = 10.0; // Ângulo de inclinação da câmera em graus
-    private static final double TARGET_HEIGHT_M = 0.75; // Altura do centro do AprilTag em metros
+    private Limelight3A limelight;
+    private DcMotor rotationMotorX = null; // Single motor for rotation X
+    private DcMotor driveMotor = null; // Motor que vai acelerar conforme a distância
 
-    // --- PARÂMETROS DO SHOOTER ---
-    private static final double MIN_POWER = 0.3; // Potência mínima do shooter
-    private static final double MAX_POWER = 1.0; // Potência máxima do shooter
-    private static final double MIN_DISTANCE_M = 0.5; // Distância mínima em metros (ajuste conforme necessário)
-    private static final double MAX_DISTANCE_M = 3.0; // Distância máxima em metros (ajuste conforme necessário)
-    private static final double POWER_SLOPE = (MAX_POWER - MIN_POWER) / (MAX_DISTANCE_M - MIN_DISTANCE_M); // Inclinação da curva de potência
 
-    private static final double distancia = 110; // Distância para detecção de bola (mm)
+    // PID Constants - These will need to be tuned for your specific robot
+    public static double Kp = 0.02; // Proportional constant
+    public static double Ki = 0.00; // Integral constant (start with 0, add if needed)
+    public static double Kd = 0.001; // Derivative constant (start with small value)
 
-    /**
-     * Calcula a distância horizontal até um alvo (AprilTag) usando a trigonometria
-     * de um triângulo retângulo, com base no ângulo vertical do alvo (ty) e
-     * nas dimensões de montagem da câmera.
-     *
-     * @param targetHeightM Altura do centro do AprilTag em metros.
-     * @param cameraHeightM Altura do centro da lente da Limelight em metros.
-     * @param cameraAngleDeg Ângulo de inclinação (pitch) da Limelight em graus, em relação ao chão.
-     * @param tyDeg O ângulo vertical do alvo em relação ao centro da Limelight (valor 'ty').
-     * @return A distância horizontal em metros.
-     */
-    public double calculateDistance(double targetHeightM, double cameraHeightM, double cameraAngleDeg, double tyDeg) {
-        // 1. Converter todos os ângulos para radianos para uso com Math.tan
-        double cameraAngleRad = Math.toRadians(cameraAngleDeg);
-        double tyRad = Math.toRadians(tyDeg);
+    private static final double TOLERANCE = 0.5;   // degrees, adjust as needed
+    private static final double XMAX_POWER = 0.5;   // Maximum motor power to apply
 
-        // 2. Calcular o ângulo total do alvo em relação ao chão
-        double totalAngleRad = cameraAngleRad + tyRad;
-
-        // 3. Aplicar a fórmula trigonométrica: Distância = (Diferença de Altura) / tan(Ângulo Total)
-        double heightDifference = targetHeightM - cameraHeightM;
-
-        // Evitar divisão por zero
-        if (Math.abs(totalAngleRad) < 0.001) {
-            return Double.MAX_VALUE;
-        }
-
-        double distanceM = heightDifference / Math.tan(totalAngleRad);
-
-        // A distância horizontal deve ser positiva
-        return Math.abs(distanceM);
-    }
-
-    /**
-     * Calcula a potência do shooter baseada na distância.
-     * Usa uma função linear: quanto maior a distância, maior a potência.
-     *
-     * @param distanceM Distância em metros até o alvo.
-     * @return Potência do shooter entre MIN_POWER e MAX_POWER.
-     */
-    public double calculateShooterPower(double distanceM) {
-        // Limitar a distância entre MIN_DISTANCE_M e MAX_DISTANCE_M
-        if (distanceM < MIN_DISTANCE_M) {
-            distanceM = MIN_DISTANCE_M;
-        } else if (distanceM > MAX_DISTANCE_M) {
-            distanceM = MAX_DISTANCE_M;
-        }
-
-        // Calcular potência usando função linear: power = MIN_POWER + (distance - MIN_DISTANCE) * POWER_SLOPE
-        double power = MIN_POWER + (distanceM - MIN_DISTANCE_M) * POWER_SLOPE;
-
-        // Garantir que está dentro dos limites
-        if (power < MIN_POWER) {
-            power = MIN_POWER;
-        } else if (power > MAX_POWER) {
-            power = MAX_POWER;
-        }
-
-        return power;
-    }
+    // PID variables
+    private double integral = 0;
+    private double lastError = 0;
+    private long lastTime = 0;
+    public static double MIN_POWER = 0.3;   // Potência mínima
+    public static double MAX_POWER = 1;   // Potência máxima
+    public static double TARGET_TA = 5.0;   // "Área" esperada quando estiver na distância ideal
+    public static double SCALE_FACTOR = 0.064; // Ajuste da curva de resposta
 
     @Override
     public void runOpMode() {
-        telemetry.addLine("Inicializando Shooter com Limelight...");
-        telemetry.update();
-
-        // Inicialização do hardware
+        // Initialize Limelight
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(100);
-        limelight.start();
+        limelight.setPollRateHz(100); // Set how often we ask Limelight for data (100 times per second)
+        limelight.start(); // Tell Limelight to start looking!
         limelight.pipelineSwitch(7);
 
-        shooter = new org.firstinspires.ftc.teamcode.drive.objects.Shooter(hardwareMap);
+        // Initialize the single rotation motor
+        rotationMotorX = hardwareMap.get(DcMotor.class, "RMX"); // Adjust name as per your robot's configuration
 
+        // Set motor direction if needed (e.g., if positive power turns it the wrong way)
+        rotationMotorX.setDirection(DcMotor.Direction.FORWARD);
+
+        // Set motor mode
+        rotationMotorX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        driveMotor = hardwareMap.get(DcMotor.class, "RMTa"); // Ajuste o nome
+        driveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driveMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        // you can use this as a regular DistanceSensor.
         sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
         Motor = hardwareMap.get(DcMotor.class, "index");
 
-        // Cast para Rev2mDistanceSensor se necessário
+        // you can also cast this to a Rev2mDistanceSensor if you want to use added
+        // methods associated with the Rev2mDistanceSensor class.
         Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
 
-        telemetry.addLine("Hardware inicializado. Pressione Start para continuar.");
+        telemetry.addData(">>", "Press start to continue");
         telemetry.update();
 
         waitForStart();
 
+        lastTime = System.currentTimeMillis();
+
         while (opModeIsActive()) {
-            // Controle do index (detecção de bola)
             boolean isDetected = false;
+
             if(sensorDistance.getDistance(DistanceUnit.MM) < distancia){
                 isDetected = true;
                 Motor.setPower(0);
-            } else {
+            }else{
                 Motor.setPower(0.5);
             }
             if (gamepad1.a){
                 Motor.setPower(1);
             }
 
-            // Obter dados da Limelight
+            telemetry.addData("Bola identificada: ", isDetected);
+            // generic DistanceSensor methods.
+            telemetry.addData("range", String.format("%.01f mm", sensorDistance.getDistance(DistanceUnit.MM)));
+
             LLResult result = limelight.getLatestResult();
 
             if (result != null && result.isValid()) {
-                double tyDeg = result.getTy();
-                double txDeg = result.getTx();
+                double tx = result.getTx(); // Horizontal Offset From Crosshair To Target (degrees)
 
-                // Calcular a distância usando a lógica geométrica
-                double distanceM = calculateDistance(
-                        TARGET_HEIGHT_M,
-                        CAMERA_HEIGHT_M,
-                        CAMERA_ANGLE_DEG,
-                        tyDeg
-                );
+                double error = tx; // Error is negative of tx for aligning to center (0 degrees)
 
-                // Calcular a potência do shooter baseada na distância
-                double shooterPower = calculateShooterPower(distanceM);
+                long currentTime = System.currentTimeMillis();
+                double deltaTime = (currentTime - lastTime) / 1000.0; // Convert to seconds
 
-                // Aplicar potência no shooter
-                shooter.Shoot(shooterPower);
+                // Calculate PID components
+                integral += error * deltaTime;
+                double derivative = (error - lastError) / deltaTime;
 
-                // Telemetria
-                telemetry.addData("Status", "AprilTag Detectado");
-                telemetry.addData("Ângulo Vertical (ty)", "%.2f graus", tyDeg);
-                telemetry.addData("Ângulo Horizontal (tx)", "%.2f graus", txDeg);
-                telemetry.addData("Distância Horizontal", "%.2f metros (%.0f cm)", distanceM, distanceM * 100.0);
-                telemetry.addData("Potência do Shooter", "%.3f", shooterPower);
-                telemetry.addData("Bola detectada", isDetected);
-                telemetry.addData("Distância sensor", "%.01f mm", sensorDistance.getDistance(DistanceUnit.MM));
+                // Calculate total power
+                double Xpower = Kp * error + Ki * integral + Kd * derivative;
+
+                // Clamp power to max_power
+                Xpower = (Math.max(-XMAX_POWER, Math.min(Xpower, XMAX_POWER))) * 2;
+
+                double ta = result.getTa(); // Área da AprilTag (relacionada à distância)
+
+                // Calcula o erro relativo à área desejada
+                double distanceError = TARGET_TA - ta;
+
+                // Quanto menor a área (mais longe), maior o erro => mais potência
+                double power = MIN_POWER + (distanceError * SCALE_FACTOR);
+
+                // Limita entre os valores mínimos e máximos
+                power = Math.max(MIN_POWER, Math.min(power, MAX_POWER));
+
+                if (Math.abs(error) > TOLERANCE) {
+                    rotationMotorX.setPower(Xpower);
+                    telemetry.addData("Status", "Adjusting");
+                } else {
+                    rotationMotorX.setPower(0);
+                    telemetry.addData("Status", "Alinhado!");
+                    integral = 0; // Reset integral when aligned to prevent wind-up
+                }
+                telemetry.addData("Target X", tx);
+                telemetry.addData("Error", error);
+                telemetry.addData("Power", Xpower);
+
+                lastError = error;
+                lastTime = currentTime;
+                if (ta >= TARGET_TA) {
+                    driveMotor.setPower(0);
+                    telemetry.addData("Status", "Distância ideal ou muito perto");
+                } else {
+                    driveMotor.setPower(power);
+                    telemetry.addData("Status", "Aproximando...");
+                }
+                telemetry.addData("Área (ta)", ta);
+                telemetry.addData("Erro de distância", distanceError);
+                telemetry.addData("Potência aplicada", power);
 
             } else {
-                // Sem AprilTag visível, parar o shooter
-                shooter.Shoot(0);
-                telemetry.addLine("Sem AprilTag ou dados inválidos");
-                telemetry.addData("Bola detectada", isDetected);
-                telemetry.addData("Distância sensor", "%.01f mm", sensorDistance.getDistance(DistanceUnit.MM));
+                // No target visible, stop motor and reset PID
+                rotationMotorX.setPower(0);
+                telemetry.addData("Status", "No Targets");
+                integral = 0;
+                lastError = 0;
+                driveMotor.setPower(0);
             }
-
             telemetry.update();
-            sleep(50); // Pequena pausa para não sobrecarregar o loop
         }
-
-        // Garantir que a Limelight e o shooter parem ao sair do loop
-        limelight.stop();
-        shooter.Shoot(0);
     }
 }
