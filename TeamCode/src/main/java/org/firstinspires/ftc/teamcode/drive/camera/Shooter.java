@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp
@@ -157,5 +158,26 @@ public class Shooter extends LinearOpMode {
             }
             telemetry.update();
         }
+    }
+    public Shooter (HardwareMap hardwareMap){
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.setPollRateHz(100); // Set how often we ask Limelight for data (100 times per second)
+        limelight.start(); // Tell Limelight to start looking!
+        limelight.pipelineSwitch(7);
+
+        rotationMotorX = hardwareMap.get(DcMotor.class, "RMX"); // Adjust name as per your robot's configuration
+
+        rotationMotorX.setDirection(DcMotor.Direction.FORWARD);
+
+        rotationMotorX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        driveMotor = hardwareMap.get(DcMotor.class, "RMTa"); // Ajuste o nome
+        driveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        driveMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
+        Motor = hardwareMap.get(DcMotor.class, "index");
+
+        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
     }
 }
