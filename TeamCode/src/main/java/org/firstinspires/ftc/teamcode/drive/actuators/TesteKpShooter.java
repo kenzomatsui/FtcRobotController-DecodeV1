@@ -1,178 +1,156 @@
-package org.firstinspires.ftc.teamcode.drive.actuators;
+package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+// Importações do FTC SDK para Limelight
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 
-@TeleOp(name="Limelight3A AprilTag Distancia", group="Vision")
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
+/**
+ * OpMode de exemplo para usar a Limelight 3A para detectar uma AprilTag
+ * e ajustar a potência de um motor com base na área do alvo (ta),
+ * utilizando as classes do FTC SDK (com.qualcomm.hardware.limelightvision).
+ *
+ * CORREÇÃO: O método getTargetFound() foi corrigido para o método correto
+ * para verificar a presença do alvo na classe LLResult do FTC SDK.
+ *
+ * PRE-REQUISITOS:
+ * 1. A Limelight 3A deve estar configurada com um pipeline de AprilTag.
+ * 2. O motor deve estar configurado no arquivo de configuração do robô com o nome "motor_distancia".
+ * 3. O pipeline da Limelight deve estar ativo.
+ */
+@Config
+@TeleOp(name = "Limelight AprilTag Motor Control (FTC SDK V2)", group = "Limelight")
 public class TesteKpShooter extends LinearOpMode {
+    public static double distancia = 110;
+    private DistanceSensor sensorDistance;
+    private DcMotor Motor;
 
+    // Objeto Limelight, usando a classe do FTC SDK
     private Limelight3A limelight;
-    private IMU imu;
-    private org.firstinspires.ftc.teamcode.drive.objects.Shooter shooter;
 
-    // --- PARÂMETROS DE CALIBRAÇÃO (MUDAR CONFORME SEU ROBÔ) ---
-    private static final double CAMERA_HEIGHT_M = 0.33; // Altura da câmera em metros
-    private static final double CAMERA_ANGLE_DEG = 10.0; // Ângulo de inclinação da câmera em graus
-    private static final double TARGET_HEIGHT_M = 0.75; // Altura do centro do AprilTag em metros
-    
-    // --- COORDENADAS DO GOAL (TUNAR BASEADO NO GAME MANUAL) ---
-    // Coordenadas do centro do goal onde vocês querem atirar (em metros, no sistema de coordenadas do campo)
-    // Para aliança AZUL (canto superior esquerdo), ajuste conforme necessário
-    private static final double GOAL_X_M = 0.0; // Ajuste com a coordenada X do goal (em metros)
-    private static final double GOAL_Y_M = 0.0; // Ajuste com a coordenada Y do goal (em metros)
-    // Para aliança VERMELHA, inverta ou use coordenadas diferentes
-    // ---------------------------------------------------------
+    // Motor que será controlado pela distância
+    private DcMotor motorDistancia;
 
-    // --- PARÂMETROS DE POTÊNCIA DO SHOOTER (TUNAR EM CAMPO) ---
-    private static final double MIN_POWER = 0.30;       // potência mínima segura
-    private static final double MAX_POWER = 1.00;       // potência máxima
-    private static final double MIN_DISTANCE_M = 0.50;  // distância mínima considerada
-    private static final double MAX_DISTANCE_M = 3.00;  // distância máxima considerada
-    private static final double POWER_SLOPE = (MAX_POWER - MIN_POWER) / (MAX_DISTANCE_M - MIN_DISTANCE_M);
+    // Área Alvo (ta) em porcentagem (0-100).
+    // Um valor maior de 'ta' significa que o robô está mais perto.
+    // Exemplo: 5.0% da área da imagem. Ajuste este valor experimentalmente.
+    private final double TARGET_AREA_PERCENT = 5.0;
 
-    /**
-     * Calcula a distância euclidiana (2D) do robô até o goal usando coordenadas X e Y do campo.
-     * Isso considera tanto a distância horizontal (X) quanto vertical (Y) do campo.
-     * 
-     * @param robotX Posição X do robô no campo (em metros)
-     * @param robotY Posição Y do robô no campo (em metros)
-     * @param goalX Posição X do goal no campo (em metros)
-     * @param goalY Posição Y do goal no campo (em metros)
-     * @return Distância euclidiana em metros: sqrt((X_goal - X_robot)² + (Y_goal - Y_robot)²)
-     */
-    public double calculateDistanceXY(double robotX, double robotY, double goalX, double goalY) {
-        double deltaX = goalX - robotX;
-        double deltaY = goalY - robotY;
-        return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    }
-
-    /**
-     * Método alternativo: calcula distância usando apenas ty (mantido para fallback)
-     * Usa trigonometria baseada no ângulo vertical da AprilTag.
-     */
-    public double calculateDistanceFromTy(double targetHeightM, double cameraHeightM, double cameraAngleDeg, double tyDeg) {
-        double cameraAngleRad = Math.toRadians(cameraAngleDeg);
-        double tyRad = Math.toRadians(tyDeg);
-        double totalAngleRad = cameraAngleRad + tyRad;
-        double heightDifference = targetHeightM - cameraHeightM;
-
-        if (Math.abs(totalAngleRad) < 0.001) {
-            return Double.MAX_VALUE;
-        }
-
-        double distanceM = heightDifference / Math.tan(totalAngleRad);
-        return Math.abs(distanceM);
-    }
-
-    /**
-     * Calcula potência do shooter a partir da distância usando uma curva linear simples.
-     * Ajuste MIN_/MAX_ conforme testes de campo.
-     */
-    public double calculateShooterPower(double distanceM) {
-        double d = distanceM;
-        if (d < MIN_DISTANCE_M) d = MIN_DISTANCE_M;
-        if (d > MAX_DISTANCE_M) d = MAX_DISTANCE_M;
-        double power = MIN_POWER + (d - MIN_DISTANCE_M) * POWER_SLOPE;
-        if (power < MIN_POWER) power = MIN_POWER;
-        if (power > MAX_POWER) power = MAX_POWER;
-        return power;
-    }
+    // Constante de ganho para o controle P (Proporcional). Ajuste conforme a necessidade.
+    public static double KP = 0.15;
 
     @Override
     public void runOpMode() {
-        telemetry.addLine("Inicializando Limelight3A para cálculo de distância...");
-        telemetry.update();
-
-        // Inicialização do hardware
+        // 1. Inicialização do Hardware
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(100);
-        limelight.start();
-        limelight.pipelineSwitch(7);
+        limelight.setPollRateHz(100); // Isso define com que frequência pedimos dados ao Limelight (100 vezes por segundo)
+        limelight.start(); // Isso diz ao Limelight para começar a procurar!
+        limelight.pipelineSwitch(7); // Mudar para o pipeline número 7
+        motorDistancia = hardwareMap.get(DcMotor.class, "RMTa");
 
-        // Inicializar IMU (necessário para BotPose_MT2)
-        imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters myIMUparameters = new IMU.Parameters(
-            new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
-            )
-        );
-        imu.initialize(myIMUparameters);
+        // Configuração do motor (ajuste a direção conforme a montagem)
+        motorDistancia.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorDistancia.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // Shooter (motores motora/motorb)
-        shooter = new org.firstinspires.ftc.teamcode.drive.objects.Shooter(hardwareMap);
+        // you can use this as a regular DistanceSensor.
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
+        Motor = hardwareMap.get(DcMotor.class, "index");
+
+        // you can also cast this to a Rev2mDistanceSensor if you want to use added
+        // methods associated with the Rev2mDistanceSensor class.
+        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
+
+        // 2. Configuração da Limelight
+        // Se necessário, use limelight.setPipeline(pipelineIndex); se o método estiver disponível.
+
+        // 3. Telemetria de espera
+        telemetry.addData("Status", "Inicializado. Aguardando Start.");
+        telemetry.addData("Area Alvo (ta)", TARGET_AREA_PERCENT + "%");
+        telemetry.update();
 
         waitForStart();
 
+        if (isStopRequested()) return;
+
+        // 4. Loop Principal
         while (opModeIsActive()) {
-            // Atualizar orientação do robô para o Limelight (necessário para BotPose_MT2)
-            double robotYaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            limelight.updateRobotOrientation(robotYaw);
+            boolean isDetected = false;
 
-            LLResult result = limelight.getLatestResult();
-            double distanceM = 0.0;
-            boolean useXY = false;
+            if(sensorDistance.getDistance(DistanceUnit.MM) < distancia){
+                isDetected = true;
+                Motor.setPower(0);
+            }else{
+                Motor.setPower(0.5);
+            }
+            if (gamepad1.a){
+                Motor.setPower(1);
+            }
 
-            if (result != null && result.isValid()) {
-                // Tentar obter posição do robô usando BotPose_MT2 (método preferido)
-                Pose3D botpose_mt2 = result.getBotpose_MT2();
-                
-                if (botpose_mt2 != null) {
-                    double robotX = botpose_mt2.getPosition().x;
-                    double robotY = botpose_mt2.getPosition().y;
-                    
-                    // Calcular distância usando coordenadas X e Y (método correto para considerar X e Y)
-                    distanceM = calculateDistanceXY(robotX, robotY, GOAL_X_M, GOAL_Y_M);
-                    useXY = true;
-                    
-                    // Telemetria
-                    telemetry.addData("Status", "AprilTag Detectado (BotPose)");
-                    telemetry.addData("Posição Robô", "(%.2f, %.2f) m", robotX, robotY);
-                    telemetry.addData("Posição Goal", "(%.2f, %.2f) m", GOAL_X_M, GOAL_Y_M);
-                    telemetry.addData("Distância (X,Y)", "%.2f metros (%.0f cm)", distanceM, distanceM * 100.0);
-                    
-                } else {
-                    // Fallback: usar método ty se BotPose não estiver disponível
-                    double tyDeg = result.getTy();
-                    distanceM = calculateDistanceFromTy(
-                        TARGET_HEIGHT_M,
-                        CAMERA_HEIGHT_M,
-                        CAMERA_ANGLE_DEG,
-                        tyDeg
-                    );
-                    
-                    telemetry.addData("Status", "AprilTag Detectado (Fallback ty)");
-                    telemetry.addData("Ângulo Vertical (ty)", "%.2f graus", tyDeg);
-                    telemetry.addData("Distância (ty)", "%.2f metros (%.0f cm)", distanceM, distanceM * 100.0);
-                }
+            telemetry.addData("Bola identificada: ", isDetected);
 
-                // Calcular potência do shooter e aplicar
-                double shooterPower = calculateShooterPower(distanceM);
-                shooter.Shoot(shooterPower);
+            // Obter os resultados mais recentes da Limelight
+            LLResult results = limelight.getLatestResult();
 
-                telemetry.addData("Método", useXY ? "Coordenadas X,Y" : "Fallback ty");
-                telemetry.addData("Potência Shooter", "%.3f", shooterPower);
-                telemetry.addData("Ângulo Horizontal (tx)", "%.2f graus", result.getTx());
-                telemetry.addData("Yaw do Robô", "%.2f graus", robotYaw);
+            // CORREÇÃO: O método correto para verificar se um alvo foi encontrado
+            // na classe LLResult do FTC SDK é getTargetFound().
+            // Se o erro persistir, o método pode ser results.getTa() > 0.0,
+            // que é o que o LLResult.getTargetFound() faz internamente.
+            // Vamos tentar o método mais provável primeiro.
 
+            // O método getTargetFound() está correto para a classe LLResult do FTC SDK.
+            // O erro na imagem sugere que a versão do SDK do usuário pode ser diferente,
+            // ou o método não está disponível na versão que ele está usando.
+            // Como alternativa mais robusta, usaremos a verificação da área do alvo (ta).
+
+            // Verificação alternativa: se a área do alvo (ta) for maior que zero, um alvo foi encontrado.
+            if (results.getTa() > 0.0) {
+                // Obter os valores tx, ty e ta do alvo principal
+                double tx = results.getTx(); // Offset horizontal em graus
+                double ty = results.getTy(); // Offset vertical em graus
+                double ta = results.getTa(); // Área do alvo em porcentagem (0-100)
+
+                // Usar 'ta' (área do alvo) como proxy para a distância.
+
+                // Calcular o erro: (Área Alvo - Área Atual)
+                double error = TARGET_AREA_PERCENT - ta;
+
+                // Aplicar controle Proporcional (P)
+                double motorPower = error * KP;
+
+                // Limitar a potência do motor entre -1.0 e 1.0
+                motorPower = Math.max(-1.0, Math.min(1.0, motorPower));
+
+                // Aplicar a potência ao motor
+                motorDistancia.setPower(motorPower);
+
+                // Telemetria
+                telemetry.addData("Status", "AprilTag Encontrada");
+                telemetry.addData("tx (graus)", "%.2f", tx);
+                telemetry.addData("ty (graus)", "%.2f", ty);
+                telemetry.addData("ta (area %)", "%.2f", ta);
+                telemetry.addData("Erro (ta)", "%.2f", error);
+                telemetry.addData("Potência do Motor", "%.2f", motorPower);
             } else {
-                telemetry.addLine("Sem AprilTag ou dados inválidos");
-                shooter.Shoot(0);
+                // Nenhum alvo encontrado
+                motorDistancia.setPower(0.0);
+                telemetry.addData("Status", "Nenhum alvo AprilTag encontrado.");
+                telemetry.addData("Potência do Motor", "0.00");
             }
 
             telemetry.update();
-            sleep(50); // Pequena pausa para não sobrecarregar o loop
         }
 
-        // Garantir que a Limelight e o shooter parem ao sair do loop
-        limelight.stop();
-        shooter.Shoot(0);
+        // Parar o motor ao sair do OpMode
+        motorDistancia.setPower(0.0);
     }
 }
