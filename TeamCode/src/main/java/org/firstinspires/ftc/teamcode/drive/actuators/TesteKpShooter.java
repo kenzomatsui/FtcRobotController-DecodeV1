@@ -47,7 +47,7 @@ public class TesteKpShooter extends LinearOpMode {
     private final double TARGET_AREA_PERCENT = 5.0;
 
     // Constante de ganho para o controle P (Proporcional). Ajuste conforme a necessidade.
-    public static double KP = 0.15;
+    public static double KP = 0.146;
 
     @Override
     public void runOpMode() {
@@ -60,7 +60,6 @@ public class TesteKpShooter extends LinearOpMode {
 
         // Configuração do motor (ajuste a direção conforme a montagem)
         motorDistancia.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorDistancia.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // you can use this as a regular DistanceSensor.
         sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
