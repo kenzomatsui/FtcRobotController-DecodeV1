@@ -15,28 +15,30 @@ public class Shooter extends LinearOpMode {
 
     public static double distancia = 110;
     private DistanceSensor sensorDistance;
-    private DcMotor Motor;
+    private DcMotor Indexer;
 
     private Limelight3A limelight;
-    private DcMotor rotationMotorX = null; // Single motor for rotation X
-    private DcMotor driveMotor = null; // Motor que vai acelerar conforme a distância
+    private DcMotor rotationMotorX = null; // Motor da base
+    private DcMotor shooter = null; // Motor que vai acelerar conforme a distância
 
 
     // PID Constants - These will need to be tuned for your specific robot
-    public static double Kp = 0.02; // Proportional constant
-    public static double Ki = 0.00; // Integral constant (start with 0, add if needed)
-    public static double Kd = 0.001; // Derivative constant (start with small value)
+    public static double Kp = 0.02; // Constante proporcial
+    public static double Ki = 0.00; // Constante Integral
+    public static double Kd = 0.001; // Constante Derivada
 
-    private static final double TOLERANCE = 0.5;   // degrees, adjust as needed
-    private static final double XMAX_POWER = 0.5;   // Maximum motor power to apply
+    private static final double TOLERANCE = 0.5;   // Tolerância em graus
+    private static final double XMAX_POWER = 0.5;   // Potência máxima pro motor da base
 
-    // PID variables
+    // variáveis de PID
     private double integral = 0;
     private double lastError = 0;
     private long lastTime = 0;
+
+    // Do shooter:
     public static double MIN_POWER = 0.3;   // Potência mínima
     public static double MAX_POWER = 1;   // Potência máxima
-    public static double TARGET_TA = 5.0;   // "Área" esperada quando estiver na distância ideal
+    public static double TARGET_TA = 5.0;   // Tamanho real da apriltag
     public static double SCALE_FACTOR = 0.064; // Ajuste da curva de resposta
 
     @Override
@@ -56,13 +58,13 @@ public class Shooter extends LinearOpMode {
         // Set motor mode
         rotationMotorX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        driveMotor = hardwareMap.get(DcMotor.class, "RMTa"); // Ajuste o nome
-        driveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        driveMotor.setDirection(DcMotor.Direction.FORWARD);
+        shooter = hardwareMap.get(DcMotor.class, "RMTa"); // Ajuste o nome
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooter.setDirection(DcMotor.Direction.FORWARD);
 
         // you can use this as a regular DistanceSensor.
         sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
-        Motor = hardwareMap.get(DcMotor.class, "index");
+        Indexer = hardwareMap.get(DcMotor.class, "index");
 
         // you can also cast this to a Rev2mDistanceSensor if you want to use added
         // methods associated with the Rev2mDistanceSensor class.
@@ -80,12 +82,12 @@ public class Shooter extends LinearOpMode {
 
             if(sensorDistance.getDistance(DistanceUnit.MM) < distancia){
                 isDetected = true;
-                Motor.setPower(0);
+                Indexer.setPower(0);
             }else{
-                Motor.setPower(0.5);
+                Indexer.setPower(0.5);
             }
             if (gamepad1.a){
-                Motor.setPower(1);
+                Indexer.setPower(1);
             }
 
             telemetry.addData("Bola identificada: ", isDetected);
@@ -138,10 +140,10 @@ public class Shooter extends LinearOpMode {
                 lastError = error;
                 lastTime = currentTime;
                 if (ta >= TARGET_TA) {
-                    driveMotor.setPower(0);
+                    shooter.setPower(0);
                     telemetry.addData("Status", "Distância ideal ou muito perto");
                 } else {
-                    driveMotor.setPower(power);
+                    shooter.setPower(power);
                     telemetry.addData("Status", "Aproximando...");
                 }
                 telemetry.addData("Área (ta)", ta);
@@ -154,7 +156,7 @@ public class Shooter extends LinearOpMode {
                 telemetry.addData("Status", "No Targets");
                 integral = 0;
                 lastError = 0;
-                driveMotor.setPower(0);
+                shooter.setPower(0);
             }
             telemetry.update();
         }
@@ -171,12 +173,12 @@ public class Shooter extends LinearOpMode {
 
         rotationMotorX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        driveMotor = hardwareMap.get(DcMotor.class, "RMTa"); // Ajuste o nome
-        driveMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        driveMotor.setDirection(DcMotor.Direction.FORWARD);
+        shooter = hardwareMap.get(DcMotor.class, "RMTa"); // Ajuste o nome
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooter.setDirection(DcMotor.Direction.FORWARD);
 
         sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
-        Motor = hardwareMap.get(DcMotor.class, "index");
+        Indexer = hardwareMap.get(DcMotor.class, "index");
 
         Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) sensorDistance;
     }
