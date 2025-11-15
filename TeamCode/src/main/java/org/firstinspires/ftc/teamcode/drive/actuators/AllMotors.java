@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.drive.actuators;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp
+@Disabled
 public class AllMotors extends OpMode {
     DcMotor a, b, c, d, e, f, g, h;
     public void init(){

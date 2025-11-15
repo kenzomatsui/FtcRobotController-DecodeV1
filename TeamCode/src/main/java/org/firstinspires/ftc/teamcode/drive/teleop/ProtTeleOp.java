@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.drive.objects.ShooterObj;
 
 @TeleOp
 public class ProtTeleOp extends OpMode {
-    FieldOrientedDrive fod; //Classe da Movimentação do Chassi
+    FieldOrientedDrive fod;
     ShooterObj shooter;
 
 
