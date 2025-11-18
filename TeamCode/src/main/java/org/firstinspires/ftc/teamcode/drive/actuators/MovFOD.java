@@ -15,6 +15,6 @@ public class MovFOD extends OpMode {
     }
 
     public void loop() {
-        fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.right_trigger, gamepad1.right_bumper);
+        fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.right_bumper);
     }
 }

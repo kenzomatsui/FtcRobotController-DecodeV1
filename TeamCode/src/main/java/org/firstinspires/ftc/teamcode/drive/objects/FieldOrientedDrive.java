@@ -45,13 +45,12 @@ public class FieldOrientedDrive {
         imu.initialize(parameters);
     }
 
-    public void movement(double lx, double ly, double rx, double drivepower, boolean resetIMU) {
+    public void movement(double lx, double ly, double rx, boolean resetIMU) {
 
         // Calcula o valor máximo absoluto das entradas do joystick, garantindo que nenhuma potência exceda 1.
         double max = Math.max(Math.abs(lx) + Math.abs(ly) + Math.abs(rx), 1);
 
         // Calcula a potência ajustada, permitindo uma redução da velocidade máxima.
-        double drivePower = 1 - (0.5 * drivepower);
 
         // Se resetIMU for verdadeiro, redefine a guinada (yaw) da IMU para a orientação atual do robô.
         if (resetIMU) {
@@ -66,10 +65,10 @@ public class FieldOrientedDrive {
         double adjustedLy = ly * Math.cos(heading) - lx * Math.sin(heading);
 
         // Define a potência para cada motor, combinando os movimentos ajustados e a rotação, e normalizando pelo valor máximo.
-        leftFront.setPower(((adjustedLy + adjustedLx + rx) / max) * drivePower);
-        leftBack.setPower(((adjustedLy - adjustedLx + rx) / max) * drivePower);
-        rightFront.setPower(((adjustedLy - adjustedLx - rx) / max) * drivePower);
-        rightBack.setPower(((adjustedLy + adjustedLx - rx) / max) * drivePower);
+        leftFront.setPower(((adjustedLy + adjustedLx + rx) / max));
+        leftBack.setPower(((adjustedLy - adjustedLx + rx) / max));
+        rightFront.setPower(((adjustedLy - adjustedLx - rx) / max));
+        rightBack.setPower(((adjustedLy + adjustedLx - rx) / max));
     }
 }
 

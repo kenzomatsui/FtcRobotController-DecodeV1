@@ -107,9 +107,6 @@ public class Teleop extends OpMode {
         telemetry.addData("PoliaLeft: ", polialeft.getCurrentPosition());
         telemetry.addData("PoliaRight: ", poliaright.getCurrentPosition());
             //INTAKE
-            if (gamepad2.dpad_down) {
-                intake.retractsIntake();
-            }
             if (gamepad2.a) {
                 garra.setPosition(0.3);
             }
@@ -125,9 +122,6 @@ public class Teleop extends OpMode {
             if (gamepad1.left_trigger > 0.1) {
                 polialeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 poliaright.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            }
-            if (gamepad2.dpad_up) {
-                intake.extendsIntake();
             }
 
             //OUTTAKE
