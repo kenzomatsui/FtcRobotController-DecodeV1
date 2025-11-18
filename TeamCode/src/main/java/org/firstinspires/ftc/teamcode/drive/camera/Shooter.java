@@ -20,11 +20,11 @@ public class Shooter extends LinearOpMode {
 
         while (opModeIsActive()) {
             shooter.update(); // Atualiza o shooter a cada ciclo
-            shooter.detectBall(); // Verifica bola e controla Indexer
+            //shooter.detectBall(); // Verifica bola e controla Indexer
             shooter.aimAndShoot(); // Faz o alinhamento e o disparo com base na Limelight
 
             // Controle manual opcional (exemplo)
-            if (gamepad1.a) shooter.Shoot(gamepad1.right_trigger);
+           // if (gamepad1.a) shooter.Shoot(gamepad1.right_trigger);
 
             telemetry.addData("Distância", shooter.getDistance());
             telemetry.update();

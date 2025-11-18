@@ -13,15 +13,38 @@ public class ProtTeleOp extends OpMode {
 
 
     public void init() {
-        shooter = new ShooterObj(hardwareMap);
         fod = new FieldOrientedDrive(hardwareMap);
+        shooter = new ShooterObj(hardwareMap);
+
     }
 
     public void loop() {
-        shooter.update();
+        fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_trigger, gamepad1.left_bumper);
         shooter.aimAndShoot();
-        shooter.Shoot(gamepad1.right_trigger);
-        fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.right_trigger, gamepad1.right_bumper);
+        shooter.detectBall(gamepad1.right_trigger);
+
 
     }
 }
+
+/* CONFIGURAÇÃO DO DRIVER
+ * Control hub:
+ * 0 - RMX
+ * 1 - index
+ * 2 - RMTa
+ * 3 - intake
+ *
+ * I2c:
+ * 0 - imu
+ * 1 - pinpoint
+ * 2 - sensor_distance
+ *
+ * USB 2.0: limelight
+ *
+ * Expansion hub:
+ * 0 - BL
+ * 1 - BR
+ * 2 - FL
+ * 3 - FR
+ */
+

@@ -33,7 +33,7 @@ public class ShooterObj {
         rotationMotorX = hardwareMap.get(DcMotor.class, "RMX");
         rotationMotorX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        shooterD = hardwareMap.get(DcMotor.class, "shootD");
+        shooterD = hardwareMap.get(DcMotor.class, "RMTa");
         shooterD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         indexer = hardwareMap.get(DcMotor.class, "index");
@@ -88,18 +88,17 @@ public class ShooterObj {
         }
     }
 
-    public void detectBall() {
+    public void detectBall(double Lp) {
         double distance = sensorDistance.getDistance(DistanceUnit.MM);
         if (distance < DISTANCIA_BOLA) {
             indexer.setPower(0);
         } else {
             indexer.setPower(0.5);
         }
-    }
-
-    public void Shoot(float Lp) {
-        indexer.setPower(Lp);
-        sleep(500);
+        if (Lp > 0.1){
+            indexer.setPower(1);
+            sleep(200);
+        }
     }
 
     public double getDistance() {
