@@ -15,6 +15,7 @@ public class TesteMotor extends OpMode {
         // nome do motor deve ser igual ao configurado no Driver Hub
         motor = hardwareMap.get(DcMotor.class, "BL");
         telemetry.addData("Status", "Inicializado");
+        gamepad1.rumble(500);
     }
 
     @Override
