@@ -24,7 +24,7 @@ public class ProtTeleOp extends OpMode {
         fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_bumper);
         shooter.aimAndShoot();
         shooter.detectBall(gamepad1.right_trigger);
-        intake.Coleta(gamepad1.left_trigger);
+        intake.Coleta(-gamepad1.left_trigger);
     }
 }
 

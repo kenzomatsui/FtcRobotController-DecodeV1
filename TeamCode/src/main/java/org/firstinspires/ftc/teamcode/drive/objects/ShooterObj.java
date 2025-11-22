@@ -5,10 +5,12 @@ import static android.os.SystemClock.sleep;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import org.firstinspires.ftc.teamcode.drive.actuators.MotorRPMWatcher;
 public class ShooterObj {
 
     private static final double DISTANCIA_BOLA = 110; // mm
@@ -19,10 +21,14 @@ public class ShooterObj {
 
     private Limelight3A limelight;
     private DistanceSensor sensorDistance;
-    private DcMotor indexer, rotationMotorX, shooterD;
+    private DcMotorEx indexer, rotationMotorX, shooterD;
 
     private double integral = 0, lastError = 0;
     private long lastTime = System.currentTimeMillis();
+    public double ACTUAL_SPEED;
+    public double TARGET_SPEED;
+    private static final double TICKS_PER_REV = 28 * 4;
+    MotorRPMWatcher rpmWatcher = new MotorRPMWatcher(shooterD, TICKS_PER_REV, TARGET_SPEED);
 
     public ShooterObj(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -30,13 +36,13 @@ public class ShooterObj {
         limelight.start();
         limelight.pipelineSwitch(7);
 
-        rotationMotorX = hardwareMap.get(DcMotor.class, "RMX");
+        rotationMotorX = hardwareMap.get(DcMotorEx.class, "RMX");
         rotationMotorX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        shooterD = hardwareMap.get(DcMotor.class, "RMTa");
+        shooterD = hardwareMap.get(DcMotorEx.class, "RMTa");
         shooterD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        indexer = hardwareMap.get(DcMotor.class, "index");
+        indexer = hardwareMap.get(DcMotorEx.class, "index");
         sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
     }
 
@@ -73,6 +79,8 @@ public class ShooterObj {
 
         lastError = error;
         lastTime = now;
+        TARGET_SPEED = power;
+        ACTUAL_SPEED = rpmWatcher.getRPM();
     }
 
     private void controlShooterPower(LLResult result) {
