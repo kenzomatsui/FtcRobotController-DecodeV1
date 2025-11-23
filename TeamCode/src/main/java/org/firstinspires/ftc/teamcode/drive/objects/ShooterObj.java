@@ -11,17 +11,18 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import org.firstinspires.ftc.teamcode.drive.actuators.MotorRPMWatcher;
+
 public class ShooterObj {
 
-    private static final double DISTANCIA_BOLA = 110; // mm
+    private static final double DISTANCIA_BOLA = 138; // mm
     private static final double KP = 0.02, KI = 0.0, KD = 0.001;
     private static final double TOLERANCIA = 0.5, XMAX_POWER = 0.5;
     private static final double MIN_POWER = 0.3, MAX_POWER = 1.0;
     private static final double TARGET_TA = 5.0, SCALE_FACTOR = 0.064;
 
     private Limelight3A limelight;
-    private DistanceSensor sensorDistance;
-    private DcMotorEx indexer, rotationMotorX, shooterD;
+    public DistanceSensor sensorDistance;
+    private DcMotorEx indexer, rotationMotorX, shooterD, intake;
 
     private double integral = 0, lastError = 0;
     private long lastTime = System.currentTimeMillis();
@@ -41,6 +42,9 @@ public class ShooterObj {
 
         shooterD = hardwareMap.get(DcMotorEx.class, "RMTa");
         shooterD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         indexer = hardwareMap.get(DcMotorEx.class, "index");
         sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
@@ -99,13 +103,13 @@ public class ShooterObj {
     public void detectBall(double Lp) {
         double distance = sensorDistance.getDistance(DistanceUnit.MM);
         if (distance < DISTANCIA_BOLA) {
+            sleep(400);
             indexer.setPower(0);
         } else {
             indexer.setPower(0.5);
         }
-        if (Lp > 0.1){
+        if (Lp>0.1){
             indexer.setPower(1);
-            sleep(200);
         }
     }
 
