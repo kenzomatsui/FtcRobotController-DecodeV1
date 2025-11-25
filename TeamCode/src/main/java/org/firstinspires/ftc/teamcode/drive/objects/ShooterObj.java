@@ -6,6 +6,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -29,7 +30,6 @@ public class ShooterObj {
     public double ACTUAL_SPEED;
     public double TARGET_SPEED;
     private static final double TICKS_PER_REV = 28 * 4;
-    MotorRPMWatcher rpmWatcher = new MotorRPMWatcher(shooterD, TICKS_PER_REV, TARGET_SPEED);
 
     public ShooterObj(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -42,6 +42,7 @@ public class ShooterObj {
 
         shooterD = hardwareMap.get(DcMotorEx.class, "RMTa");
         shooterD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        shooterD.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -83,8 +84,6 @@ public class ShooterObj {
 
         lastError = error;
         lastTime = now;
-        TARGET_SPEED = power;
-        ACTUAL_SPEED = rpmWatcher.getRPM();
     }
 
     private void controlShooterPower(LLResult result) {

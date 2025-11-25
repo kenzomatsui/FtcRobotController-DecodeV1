@@ -10,16 +10,16 @@ public class TurretEncoderLimited extends LinearOpMode {
     private DcMotor turretMotor;
 
     // Configurações do Encoder do UltraPlanetary
-    private static final double TICKS_PER_REV = 84.0;  // 28 * 3:1
+    private static final double TICKS_PER_REV = 420.0;  // 28 * 3:1
 
     // Limites em graus
     private static final double MIN_ANGLE = 0;
-    private static final double MAX_ANGLE = 270;
+    private static final double MAX_ANGLE = 180;
 
     @Override
     public void runOpMode() {
 
-        turretMotor = hardwareMap.get(DcMotor.class, "turret");
+        turretMotor = hardwareMap.get(DcMotor.class, "RMX");
 
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -37,15 +37,16 @@ public class TurretEncoderLimited extends LinearOpMode {
             // Controle manual no stick direito
             double power = -gamepad1.right_stick_x;
 
-            // Bloqueia ultrapassar os limites
-            if (angle <= MIN_ANGLE && power < 0) {
-                power = 0;
+            if(angle >= MAX_ANGLE){
+                turretMotor.setPower(0);
+                sleep(3000);
             }
-            if (angle >= MAX_ANGLE && power > 0) {
-                power = 0;
+            if (angle <= MIN_ANGLE){
+                turretMotor.setPower(0);
+                sleep(3000);
+            } else {
+                turretMotor.setPower(power);
             }
-
-            turretMotor.setPower(power);
 
             // Telemetria
             telemetry.addData("Encoder", turretMotor.getCurrentPosition());

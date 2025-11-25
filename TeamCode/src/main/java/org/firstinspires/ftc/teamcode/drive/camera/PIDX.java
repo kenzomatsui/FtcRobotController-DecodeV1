@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 @Config
 @TeleOp
-@Disabled
 public class PIDX extends LinearOpMode {
 
     private Limelight3A limelight;

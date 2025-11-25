@@ -13,7 +13,8 @@ public class TesteMotor extends OpMode {
     @Override
     public void init() {
         // nome do motor deve ser igual ao configurado no Driver Hub
-        motor = hardwareMap.get(DcMotor.class, "BL");
+        motor = hardwareMap.get(DcMotor.class, "RMTa");
+        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         telemetry.addData("Status", "Inicializado");
         gamepad1.rumble(500);
     }
@@ -25,6 +26,7 @@ public class TesteMotor extends OpMode {
         motor.setPower(power);
 
         telemetry.addData("Potência", power);
+        telemetry.addData("Current Position: ", (motor.getCurrentPosition()));
         telemetry.update();
     }
 }

@@ -20,15 +20,10 @@ public class Shooter extends LinearOpMode {
 
         while (opModeIsActive()) {
             shooter.update(); // Atualiza o shooter a cada ciclo
-            shooter.detectBall(gamepad1.right_trigger); // Verifica bola e controla Indexer
+
             shooter.aimAndShoot(); // Faz o alinhamento e o disparo com base na Limelight
 
-            if (shooter.ACTUAL_SPEED >= shooter.TARGET_SPEED){
-                gamepad1.rumble(300);
-            }
             telemetry.addData("Distância", shooter.getDistance());
-            telemetry.addData("Target: ", shooter.TARGET_SPEED);
-            telemetry.addData("Actual: ", shooter.ACTUAL_SPEED);
             telemetry.update();
         }
     }
