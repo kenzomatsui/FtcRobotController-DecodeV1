@@ -137,7 +137,7 @@ public class PedroAutonomous extends OpMode {
 
             case 2:
                 if (!follower.isBusy()) {
-                    intake.Coleta(0, 0);
+                    intake.Coleta(-1, 0);
                     follower.setMaxPower(1);
                     follower.followPath(scorePickup1, true);
                     setPathState(3);

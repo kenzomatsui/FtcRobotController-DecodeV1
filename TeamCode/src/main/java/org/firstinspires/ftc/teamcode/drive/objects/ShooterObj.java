@@ -11,17 +11,22 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.drive.actuators.MotorRPMWatcher;
 
 public class ShooterObj {
 
-    private static final double DISTANCIA_BOLA = 138; // mm
+    private static final double DISTANCIA_BOLA = 138; // mm sensor de ball no slot final
 
     private static final double KP = 0.08, KI = 0.0, KD = 0.002;
     private static final double TOLERANCIA = 0.5, XMAX_POWER = 0.5;
 
     private static final double MIN_POWER = 0.35, MAX_POWER = 1.0;
     private static final double TARGET_TA = 5.0, SCALE_FACTOR = 0.084;
+
+    // Tempos (ajustáveis)
+    private static final long SHOOTER_RECOVERY_TIME = 900;     // tempo para o shooter recuperar
+    private static final long INDEXER_SHOOT_TIME    = 700;     // tempo que o indexer gira "de uma vez" para atirar
+    private static final long INDEXER_ADVANCE_TIME  = 350;     // tempo para avançar durante carregamento
+    private static final long INDEXER_DETECT_TIME   = 500;     // tempo de confirmação do sensor
 
     private Limelight3A limelight;
     public DistanceSensor sensorDistance;
@@ -31,11 +36,14 @@ public class ShooterObj {
     private double integral = 0, lastError = 0;
     private long lastTime = System.currentTimeMillis();
 
-    boolean ballLoaded = false;
-    long detectStart = 0;
-    boolean timing = false;
+    // Controle interno
+    public boolean temBola = false;
+    private boolean timing = false;
+    private long detectStart = 0;
 
-    // ---------------- CONSTRUTOR ----------------
+    // SHOOTA3 toggle
+    public boolean activate = false;
+    public boolean cicloFinalizado = false;
 
     public ShooterObj(HardwareMap hardwareMap) {
 
@@ -53,13 +61,19 @@ public class ShooterObj {
 
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        // Force a consistent direction for intake; use positive power to pull
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         indexer = hardwareMap.get(DcMotorEx.class, "index");
+        // Make indexer run without encoder to ensure consistent timed spins
+        indexer.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        indexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_distance");
     }
 
-    // ---------------- UPDATE ----------------
+
+    // ------------------- LIMELIGHT UPDATE ----------------------
 
     public void update() {
         LLResult result = limelight.getLatestResult();
@@ -67,12 +81,11 @@ public class ShooterObj {
         if (result != null && result.isValid()) {
             alignToTarget(result);
             controlShooterPower(result);
-        } else {
-            stopAll();
-        }
+        } else stopAll();
     }
 
-    // ---------------- ALINHAMENTO ----------------
+
+    // ------------------- ALINHAMENTO ---------------------------
 
     private void alignToTarget(LLResult result) {
 
@@ -98,113 +111,148 @@ public class ShooterObj {
         lastError = error;
         lastTime = now;
     }
+    public void SHOOTERDAvi(boolean vai){
+        if (vai) {
+            Shoot(1);
+            intake.setPower(-1);
+            sleep(1000);
+            Shoot(1);
+            intake.setPower(-1);
+            sleep(1200);
+            Shoot(1);
+            intake.setPower(-1);
+            sleep(1200);
+            Shoot(1);
+        }
+    }
 
-    // ---------------- CONTROLE DO SHOOTER ----------------
+
+    // ------------------- CONTROLE DO SHOOTER -------------------
 
     private void controlShooterPower(LLResult result) {
         double ta = result.getTa();
-
         double distanceError = TARGET_TA - ta;
         double power = MIN_POWER + (distanceError * SCALE_FACTOR);
 
         power = Math.max(MIN_POWER, Math.min(power, MAX_POWER));
 
-        if (ta >= TARGET_TA) {
-            shooterD.setPower(0);
-        } else {
-            shooterD.setPower(power);
-        }
+        if (ta >= TARGET_TA) shooterD.setPower(0);
+        else shooterD.setPower(power);
     }
 
 
-    // ---------------- DETECÇÃO DA BOLA ----------------
+    // ------------------- DETECÇÃO DE BOLA ----------------------
 
     public void detectBall() {
 
-        if (ballLoaded) {
-            indexer.setPower(0);
-            return;
-        }
+        double dist = sensorDistance.getDistance(DistanceUnit.MM);
 
-        double distance = sensorDistance.getDistance(DistanceUnit.MM);
-
-        if (distance < DISTANCIA_BOLA) {
+        if (dist < DISTANCIA_BOLA) {
 
             if (!timing) {
                 detectStart = System.currentTimeMillis();
                 timing = true;
+                // Enquanto detectando, deixamos indexer empurrando (para estabilizar)
                 indexer.setPower(0.7);
             }
 
-            if (System.currentTimeMillis() - detectStart >= 650) {
+            if (System.currentTimeMillis() - detectStart >= INDEXER_DETECT_TIME) {
                 indexer.setPower(0);
-                ballLoaded = true;
+                temBola = true;   // bola posicionada para tiro
                 timing = false;
             }
 
         } else {
-            indexer.setPower(0.7);
+            // limpa temporizadores se não detecta
             timing = false;
         }
     }
 
 
-    // ---------------- SHOOT ----------------
-
-    public void Shoot(double Lp) {
-
-        if (Lp > 0.01) {
-
-            indexer.setPower(1);
-            ballLoaded = false;
-            return;
-        }
-
-        if (!ballLoaded) {
-            indexer.setPower(0.7);
-        } else {
-            indexer.setPower(0);
-        }
-    }
-   public void Shoota3(){
-
-       if (ballLoaded) {
-           Shoot(1);
-           return;
-       }
-
-       double distance = sensorDistance.getDistance(DistanceUnit.MM);
-
-       if (distance < DISTANCIA_BOLA) {
-
-           if (!timing) {
-               detectStart = System.currentTimeMillis();
-               timing = true;
-               indexer.setPower(0.7);
-           }
-
-           if (System.currentTimeMillis() - detectStart >= 650) {
-               indexer.setPower(0);
-               ballLoaded = true;
-               timing = false;
-           }
-
-       } else {
-           indexer.setPower(0.7);
-           timing = false;
-       }
-   }
-
-
-
-
-
-
-    // ---------------- AUXILIARES ----------------
-
     public double getDistance() {
         return sensorDistance.getDistance(DistanceUnit.MM);
     }
+
+
+    // ------------------- TIRO MANUAL ---------------------------
+
+    public void Shoot(double trigger) {
+
+        if (trigger > 0.05) {
+            // Giro "firme" e direto para empurrar a bola até o shooter
+            indexer.setPower(1.0);
+            sleep(INDEXER_SHOOT_TIME); // tempo maior para garantir giro completo
+            indexer.setPower(0);
+            temBola = false;
+            return;
+        }
+
+        if (!temBola) indexer.setPower(0.7);
+        else indexer.setPower(0);
+    }
+
+
+    // ------------------- SHOOTA3 COMPLETO ----------------------
+
+    public void Shoota3(boolean toggle) {
+
+        if (toggle) {
+            activate = !activate;
+            cicloFinalizado = false;
+            sleep(200);
+        }
+
+        if (!activate) return;
+
+        double dist = sensorDistance.getDistance(DistanceUnit.MM);
+
+        // 1) Se tem bola → atira (gira indexer por tempo maior para "ir direto")
+        if (temBola) {
+
+            indexer.setPower(1.0);
+            sleep(INDEXER_SHOOT_TIME);   // giro direto, suficiente para levar ao shooter
+            indexer.setPower(0);
+
+            temBola = false;
+            sleep(SHOOTER_RECOVERY_TIME);
+            return;
+        }
+
+        // 2) Não tem bola → carregar próxima
+        // intake puxa bola da posição 3 → 2 (intake.direction REVERSE, usa power positive)
+        intake.setPower(1.0);
+        // indexer empurra bola de 2 → 1 durante o carregamento
+        indexer.setPower(0.7);
+
+        if (dist < DISTANCIA_BOLA) {
+
+            if (!timing) {
+                detectStart = System.currentTimeMillis();
+                timing = true;
+            }
+
+            if (System.currentTimeMillis() - detectStart >= INDEXER_ADVANCE_TIME) {
+                // Já ficou tempo suficiente, consideramos carregada na posição final
+                indexer.setPower(0);
+                intake.setPower(0);
+
+                temBola = true;
+                timing = false;
+            }
+
+        } else {
+
+            // Não há mais bola vindo → encerrar
+            indexer.setPower(0);
+            intake.setPower(0);
+
+            activate = false;
+            cicloFinalizado = true;
+        }
+    }
+
+
+    // ------------------- AUXILIARES -----------------------------
 
     public void stopAll() {
         rotationMotorX.setPower(0);
@@ -213,12 +261,9 @@ public class ShooterObj {
 
     public void aimAndShoot() {
         LLResult result = limelight.getLatestResult();
-
         if (result != null && result.isValid()) {
             alignToTarget(result);
             controlShooterPower(result);
-        } else {
-            stopAll();
-        }
+        } else stopAll();
     }
 }

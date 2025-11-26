@@ -26,9 +26,10 @@ public class ProtTeleOp extends OpMode {
         shooter.detectBall();
         shooter.Shoot(gamepad1.right_trigger);
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
-        if (gamepad1.a) {
-            shooter.Shoota3();
-        }
+        shooter.SHOOTERDAvi(gamepad1.b);
+        telemetry.addData("Shoota3 Ativo", shooter.activate);
+        telemetry.addData("Ciclo Finalizado", shooter.cicloFinalizado);
+        telemetry.update();
     }
 }
 
