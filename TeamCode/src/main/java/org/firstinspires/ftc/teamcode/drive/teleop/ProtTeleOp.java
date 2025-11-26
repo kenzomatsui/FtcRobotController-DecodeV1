@@ -26,8 +26,9 @@ public class ProtTeleOp extends OpMode {
         shooter.detectBall();
         shooter.Shoot(gamepad1.right_trigger);
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
-
-        shooter.Shoota3(gamepad1.a);
+        if (gamepad1.a) {
+            shooter.Shoota3();
+        }
     }
 }
 

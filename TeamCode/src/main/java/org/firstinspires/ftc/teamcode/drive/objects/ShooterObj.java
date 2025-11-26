@@ -20,7 +20,7 @@ public class ShooterObj {
     private static final double KP = 0.08, KI = 0.0, KD = 0.002;
     private static final double TOLERANCIA = 0.5, XMAX_POWER = 0.5;
 
-    private static final double MIN_POWER = 0.3, MAX_POWER = 1.0;
+    private static final double MIN_POWER = 0.35, MAX_POWER = 1.0;
     private static final double TARGET_TA = 5.0, SCALE_FACTOR = 0.084;
 
     private Limelight3A limelight;
@@ -166,64 +166,35 @@ public class ShooterObj {
             indexer.setPower(0);
         }
     }
-    int shootState = 0;
-    long shootTimer = 0;
-    int shotsFired = 0;
+   public void Shoota3(){
 
-    public void Shoota3(boolean shootButton) {
+       if (ballLoaded) {
+           Shoot(1);
+           return;
+       }
 
-        switch (shootState) {
+       double distance = sensorDistance.getDistance(DistanceUnit.MM);
 
-            // Espera o comando para começar os 3 tiros
-            case 0:
-                if (shootButton) {
-                    shotsFired = 0;
-                    shootState = 1;
-                }
-                break;
+       if (distance < DISTANCIA_BOLA) {
 
-            // Garante que a bola está carregada antes de atirar
-            case 1:
-                detectBall();   // usa seu método normal
-                if (ballLoaded) {
-                    shootState = 2;
-                } else {
-                    intake.setPower(-0.7); // agora está CORRETO → puxa a bola pra dentro
-                }
-                break;
+           if (!timing) {
+               detectStart = System.currentTimeMillis();
+               timing = true;
+               indexer.setPower(0.7);
+           }
 
-            // Atira a bola
-            case 2:
-                Shoot(1);
-                intake.setPower(-1);   // CORRIGIDO → empurra a bola na direção certa
+           if (System.currentTimeMillis() - detectStart >= 650) {
+               indexer.setPower(0);
+               ballLoaded = true;
+               timing = false;
+           }
 
-                ballLoaded = false;
-                shootTimer = System.currentTimeMillis();
-                shootState = 3;
-                break;
+       } else {
+           indexer.setPower(0.7);
+           timing = false;
+       }
+   }
 
-            // Intervalo entre tiros → agora 1000 ms (1 segundo)
-            case 3:
-                if (System.currentTimeMillis() - shootTimer >= 1000) {
-
-                    shotsFired++;
-
-                    if (shotsFired < 3) {
-                        shootState = 1;  // preparar próxima bola
-                    } else {
-                        shootState = 4;  // terminou
-                    }
-                }
-                break;
-
-            // Fim da sequência
-            case 4:
-                intake.setPower(0);
-                indexer.setPower(0);
-                shootState = 0;
-                break;
-        }
-    }
 
 
 
