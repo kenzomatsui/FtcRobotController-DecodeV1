@@ -112,16 +112,15 @@ public class ShooterObj {
         lastTime = now;
     }
     public void SHOOTERDAvi(boolean vai){
+        intake.setPower(-1);
         if (vai) {
+            sleep(500);
             Shoot(1);
-            intake.setPower(-1);
-            sleep(1200);
+            sleep(1000);
             Shoot(1);
-            intake.setPower(-1);
-            sleep(1200);
+            sleep(1000);
             Shoot(1);
-            intake.setPower(-1);
-            sleep(1200);
+            sleep(1000);
             Shoot(1);
         }
     }
@@ -149,9 +148,9 @@ public class ShooterObj {
         double dist = sensorDistance.getDistance(DistanceUnit.MM);
 
         if (dist < DISTANCIA_BOLA){
+            sleep(500);
             indexer.setPower(0);
-        }else {
-            sleep(600);
+        }else{
             indexer.setPower(0.9);
         }
     }
@@ -180,22 +179,6 @@ public class ShooterObj {
         }
     }
 
-    public void indexerAuto() {
-        double dist = sensorDistance.getDistance(DistanceUnit.MM);
-
-        if (dist < DISTANCIA_BOLA) {
-            indexer.setPower(0.7);  // Empurra bola até posição
-            temBola = true;
-        } else {
-            indexer.setPower(0);    // Para se não tem bola
-            temBola = false;
-        }
-    }
-
-
-
-
-
     public double getDistance() {
         return sensorDistance.getDistance(DistanceUnit.MM);
     }
@@ -219,66 +202,6 @@ public class ShooterObj {
     }
     public void setShooterPowerLow(double pooi){
         shooterD.setPower(pooi);
-    }
-
-
-    // ------------------- SHOOTA3 COMPLETO ----------------------
-
-    public void Shoota3(boolean toggle) {
-
-        if (toggle) {
-            activate = !activate;
-            cicloFinalizado = false;
-            sleep(200);
-        }
-
-        if (!activate) return;
-
-        double dist = sensorDistance.getDistance(DistanceUnit.MM);
-
-        // 1) Se tem bola → atira (gira indexer por tempo maior para "ir direto")
-        if (temBola) {
-
-            indexer.setPower(1.0);
-            sleep(INDEXER_SHOOT_TIME);   // giro direto, suficiente para levar ao shooter
-            indexer.setPower(0);
-
-            temBola = false;
-            sleep(SHOOTER_RECOVERY_TIME);
-            return;
-        }
-
-        // 2) Não tem bola → carregar próxima
-        // intake puxa bola da posição 3 → 2 (intake.direction REVERSE, usa power positive)
-        intake.setPower(1.0);
-        // indexer empurra bola de 2 → 1 durante o carregamento
-        indexer.setPower(0.7);
-
-        if (dist < DISTANCIA_BOLA) {
-
-            if (!timing) {
-                detectStart = System.currentTimeMillis();
-                timing = true;
-            }
-
-            if (System.currentTimeMillis() - detectStart >= INDEXER_ADVANCE_TIME) {
-                // Já ficou tempo suficiente, consideramos carregada na posição final
-                indexer.setPower(0);
-                intake.setPower(0);
-
-                temBola = true;
-                timing = false;
-            }
-
-        } else {
-
-            // Não há mais bola vindo → encerrar
-            indexer.setPower(0);
-            intake.setPower(0);
-
-            activate = false;
-            cicloFinalizado = true;
-        }
     }
 
 

@@ -14,13 +14,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.drive.objects.Intake;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObj;
 
-@Autonomous(name = "Example Auto", group = "Examples")
-public class PedroAutonomous extends OpMode {
+@Autonomous(name = "Blue Auto", group = "Examples")
+public class BlueAuto extends OpMode {
 
     private Follower follower;
     private Timer pathTimer;
 
     boolean indexer_work = false;
+    boolean base_lock = false;
 
     private Intake intake;
     private ShooterObj shooter;
@@ -107,11 +108,10 @@ public class PedroAutonomous extends OpMode {
             // SCORE → PICKUP1 (alta velocidade + coleta lenta)
             case 1:
                 if (!follower.isBusy()) {
-
                     sleep(1100);
                     shooter.SHOOTERDAvi(true);
 
-                    follower.setMaxPower(0.35);
+                    follower.setMaxPower(0.25);
                     follower.followPath(toPickup1_endSlow);
                     setPathState(2);
 
@@ -136,7 +136,7 @@ public class PedroAutonomous extends OpMode {
                 if (!follower.isBusy()) {
                     shooter.SHOOTERDAvi(true);
 
-                    follower.setMaxPower(1.0);
+                    follower.setMaxPower(1);
                     follower.followPath(toPickup2_high);
                     setPathState(4);
                 }
@@ -145,7 +145,7 @@ public class PedroAutonomous extends OpMode {
             // PICKUP2 SLOW
             case 4:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.35);
+                    follower.setMaxPower(0.3);
                     follower.followPath(toPickup2_endSlow);
                     setPathState(5);
 
@@ -209,13 +209,14 @@ public class PedroAutonomous extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-        shooter.stopBase();
         shooter.justAim();
         shooter.setShooterPowerLow(0.65);
 
-        if(indexer_work)
-        {
+        if(indexer_work){
             shooter.testMotor();
+        }
+        if (base_lock){
+            shooter.stopBase();
         }
 
         telemetry.addData("State", pathState);
@@ -225,6 +226,7 @@ public class PedroAutonomous extends OpMode {
     // ------------------- INIT -------------------
     @Override
     public void init() {
+        base_lock = true;
         pathTimer = new Timer();
 
         follower = Constants.createFollower(hardwareMap);
