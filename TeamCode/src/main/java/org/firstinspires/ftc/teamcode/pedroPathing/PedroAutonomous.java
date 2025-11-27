@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import static android.os.SystemClock.sleep;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -17,188 +18,190 @@ import org.firstinspires.ftc.teamcode.drive.objects.ShooterObj;
 public class PedroAutonomous extends OpMode {
 
     private Follower follower;
-    private Timer pathTimer, opmodeTimer;
+    private Timer pathTimer;
+
+    boolean indexer_work = false;
 
     private Intake intake;
     private ShooterObj shooter;
 
-    private int pathState;
+    private int pathState = 0;
 
     // ---------------------- POSES ----------------------
-    private final Pose startPose      = new Pose(24, 129, Math.toRadians(140));
-    private final Pose scorePose      = new Pose(55, 85,  Math.toRadians(180));
+    private final Pose startPose       = new Pose(24, 129, Math.toRadians(140));
+    private final Pose scorePose       = new Pose(58, 85,  Math.toRadians(180));
 
-    private final Pose pickup1Pose    = new Pose(60, 60,  Math.toRadians(180));
-    private final Pose endPickup1Pose = new Pose(24, 85,  Math.toRadians(180));
+    private final Pose pickup2Pose     = new Pose(47, 61,  Math.toRadians(180));
+    private final Pose endPickup2Pose  = new Pose(18, 61,  Math.toRadians(180));
 
-    private final Pose pickup2Pose    = new Pose(60, 28,  Math.toRadians(180));
-    private final Pose endPickup2Pose = new Pose(18, 28,  Math.toRadians(180));
+    private final Pose pickup3Pose     = new Pose(47, 37, Math.toRadians(180));
+    private final Pose endPickup3Pose  = new Pose(18, 37, Math.toRadians(180));
 
-    private final Pose pickup3Pose    = new Pose(60, -8,  Math.toRadians(180));
-    private final Pose endPickup3Pose = new Pose(18, -8,  Math.toRadians(180));
+    private final Pose endPickup1Pose  = new Pose(19, 85, Math.toRadians(180));
 
-    // ------------------- PATH OBJECTS -------------------
-    private Path scorePreload;
+    // ------------------- PATHS -------------------
+    private Path toScore;
 
-    private Path slowGrabPickup1;
-    private Path slowGrabPickup2;
-    private Path slowGrabPickup3;
+    private Path toPickup1_high;
+    private Path toPickup1_endSlow;
+    private Path pickup1_toScore;
 
-    private PathChain scorePickup1;
-    private PathChain grabPickup2, scorePickup2;
-    private PathChain grabPickup3, scorePickup3;
+    private Path toPickup2_high;
+    private Path toPickup2_endSlow;
+    private Path pickup2_toScore;
 
-    // ------------------- BUILD PATHS -------------------
+    private Path toPickup3_high;
+    private Path toPickup3_endSlow;
+    private Path pickup3_toScore;
+
+    // ------------------- BUILD ALL PATHS -------------------
     public void buildPaths() {
 
-        // ******************* PRELOAD → SCORE *******************
-        scorePreload = new Path(new BezierLine(startPose, scorePose));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+        // PRELOAD → SCORE
+        toScore = new Path(new BezierLine(startPose, scorePose));
+        toScore.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
+        // PICKUP 1
+        toPickup1_high = new Path(new BezierLine(scorePose, endPickup1Pose));
+        toPickup1_high.setLinearHeadingInterpolation(scorePose.getHeading(), endPickup1Pose.getHeading());
 
-        // ============================================================
-        // ======================== PICKUP 1 ===========================
-        // ============================================================
-        slowGrabPickup1 = new Path(new BezierLine(scorePose, endPickup1Pose));
-        slowGrabPickup1.setLinearHeadingInterpolation(scorePose.getHeading(), endPickup1Pose.getHeading());
+        // (pickup1 não tem "pickupPose", então só há 1 path lento)
+        toPickup1_endSlow = toPickup1_high;
 
-        // velocidade em inches/second — ajuste entre 8 e 18
-        slowGrabPickup1.setVelocityConstraint(12.0);
-        slowGrabPickup1.setTimeoutConstraint(500);
+        pickup1_toScore = new Path(new BezierLine(endPickup1Pose, scorePose));
+        pickup1_toScore.setLinearHeadingInterpolation(endPickup1Pose.getHeading(), scorePose.getHeading());
 
+        // PICKUP 2
+        toPickup2_high = new Path(new BezierLine(scorePose, pickup2Pose));
+        toPickup2_high.setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading());
 
+        toPickup2_endSlow = new Path(new BezierLine(pickup2Pose, endPickup2Pose));
+        toPickup2_endSlow.setLinearHeadingInterpolation(pickup2Pose.getHeading(), endPickup2Pose.getHeading());
 
-        scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(endPickup1Pose, scorePose))
-                .setLinearHeadingInterpolation(endPickup1Pose.getHeading(), scorePose.getHeading())
-                .build();
+        pickup2_toScore = new Path(new BezierLine(endPickup2Pose, scorePose));
+        pickup2_toScore.setLinearHeadingInterpolation(endPickup2Pose.getHeading(), scorePose.getHeading());
 
+        // PICKUP 3
+        toPickup3_high = new Path(new BezierLine(scorePose, pickup3Pose));
+        toPickup3_high.setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading());
 
-        // ============================================================
-        // ======================== PICKUP 2 ===========================
-        // ============================================================
+        toPickup3_endSlow = new Path(new BezierLine(pickup3Pose, endPickup3Pose));
+        toPickup3_endSlow.setLinearHeadingInterpolation(pickup3Pose.getHeading(), endPickup3Pose.getHeading());
 
-        slowGrabPickup2 = new Path(new BezierLine(scorePose, pickup2Pose));
-        slowGrabPickup2.setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading());
-        slowGrabPickup2.setVelocityConstraint(8.0);
-        slowGrabPickup2.setTimeoutConstraint(500);
-
-        grabPickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose, endPickup2Pose))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), endPickup2Pose.getHeading())
-                .build();
-
-        scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(endPickup2Pose, scorePose))
-                .setLinearHeadingInterpolation(endPickup2Pose.getHeading(), scorePose.getHeading())
-                .build();
-
-
-        // ============================================================
-        // ======================== PICKUP 3 ===========================
-        // ============================================================
-
-        slowGrabPickup3 = new Path(new BezierLine(scorePose, pickup3Pose));
-        slowGrabPickup3.setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading());
-        slowGrabPickup3.setVelocityConstraint(8.0);
-        slowGrabPickup3.setTimeoutConstraint(500);
-
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, endPickup3Pose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), endPickup3Pose.getHeading())
-                .build();
-
-        scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(endPickup3Pose, scorePose))
-                .setLinearHeadingInterpolation(endPickup3Pose.getHeading(), scorePose.getHeading())
-                .build();
+        pickup3_toScore = new Path(new BezierLine(endPickup3Pose, scorePose));
+        pickup3_toScore.setLinearHeadingInterpolation(endPickup3Pose.getHeading(), scorePose.getHeading());
     }
-
 
     // ------------------- STATE MACHINE -------------------
     public void autonomousPathUpdate() {
 
         switch (pathState) {
 
-            case 0: // PRELOAD
-                follower.followPath(scorePreload);
+            // PRELOAD → SCORE
+            case 0:
+                follower.setMaxPower(1.0);
+                follower.followPath(toScore);
                 setPathState(1);
                 break;
 
-            // ===================== PICKUP 1 =====================
+            // SCORE → PICKUP1 (alta velocidade + coleta lenta)
             case 1:
                 if (!follower.isBusy()) {
-                    intake.Coleta(-1, 0);
-                    follower.setMaxPower(0.3);
-                    follower.followPath(slowGrabPickup1, true);
+
+                    sleep(1100);
+                    shooter.SHOOTERDAvi(true);
+
+                    follower.setMaxPower(0.35);
+                    follower.followPath(toPickup1_endSlow);
                     setPathState(2);
+
+                    indexer_work = true;
+                    intake.Coleta(-1,0);
                 }
                 break;
 
+            // END PICKUP1 → SCORE
             case 2:
                 if (!follower.isBusy()) {
-                    intake.Coleta(-1, 0);
-                    follower.setMaxPower(1);
-                    follower.followPath(scorePickup1, true);
+                    intake.Coleta(0,0);
+
+                    follower.setMaxPower(1.0);
+                    follower.followPath(pickup1_toScore);
                     setPathState(3);
                 }
                 break;
 
-
-            // ===================== PICKUP 2 =====================
+            // SCORE → PICKUP2 HIGH SPEED
             case 3:
                 if (!follower.isBusy()) {
-                    intake.Coleta(1, 1);
-                    follower.followPath(slowGrabPickup2, true);
-                    follower.followPath(grabPickup2, true);
+                    shooter.SHOOTERDAvi(true);
+
+                    follower.setMaxPower(1.0);
+                    follower.followPath(toPickup2_high);
                     setPathState(4);
                 }
                 break;
 
+            // PICKUP2 SLOW
             case 4:
                 if (!follower.isBusy()) {
-                    intake.Coleta(0, 0);
-                    follower.followPath(scorePickup2, true);
+                    follower.setMaxPower(0.35);
+                    follower.followPath(toPickup2_endSlow);
                     setPathState(5);
+
+                    indexer_work = true;
+                    intake.Coleta(-1,0);
                 }
                 break;
 
-
-            // ===================== PICKUP 3 =====================
+            // END PICKUP2 → SCORE
             case 5:
                 if (!follower.isBusy()) {
-                    intake.Coleta(1, 1);
-                    follower.followPath(slowGrabPickup3, true);
-                    follower.followPath(grabPickup3, true);
+                    intake.Coleta(0,0);
+                    follower.setMaxPower(1.0);
+                    follower.followPath(pickup2_toScore);
                     setPathState(6);
                 }
                 break;
 
+            // SCORE → PICKUP3 HIGH SPEED
             case 6:
                 if (!follower.isBusy()) {
-                    intake.Coleta(0, 0);
-                    follower.followPath(scorePickup3, true);
+                    shooter.SHOOTERDAvi(true);
+                    follower.setMaxPower(1.0);
+                    follower.followPath(toPickup3_high);
                     setPathState(7);
                 }
                 break;
 
-
+            // PICKUP3 SLOW
             case 7:
                 if (!follower.isBusy()) {
-                    intake.Coleta(0, 0);
-                    setPathState(-1);
+                    follower.setMaxPower(0.25);
+                    follower.followPath(toPickup3_endSlow);
+                    setPathState(8);
                 }
+                break;
+
+            // END PICKUP3 → SCORE
+            case 8:
+                if (!follower.isBusy()) {
+                    follower.setMaxPower(1.0);
+                    follower.followPath(pickup3_toScore);
+                    setPathState(9);
+                }
+                break;
+
+            case 9:
+                // FIM
                 break;
         }
     }
 
-
-    // ------------------- UTILS -------------------
-    public void setPathState(int pState) {
-        pathState = pState;
+    public void setPathState(int newState) {
+        pathState = newState;
         pathTimer.resetTimer();
     }
-
 
     // ------------------- LOOP -------------------
     @Override
@@ -206,32 +209,33 @@ public class PedroAutonomous extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-        telemetry.addData("Path State", pathState);
+        shooter.stopBase();
+        shooter.justAim();
+        shooter.setShooterPowerLow(0.65);
+
+        if(indexer_work)
+        {
+            shooter.testMotor();
+        }
+
+        telemetry.addData("State", pathState);
         telemetry.update();
     }
-
 
     // ------------------- INIT -------------------
     @Override
     public void init() {
         pathTimer = new Timer();
-        opmodeTimer = new Timer();
 
         follower = Constants.createFollower(hardwareMap);
         intake   = new Intake(hardwareMap);
         shooter  = new ShooterObj(hardwareMap);
 
-        buildPaths();
         follower.setStartingPose(startPose);
+        buildPaths();
     }
 
     @Override public void init_loop() {}
-
-    @Override
-    public void start() {
-        setPathState(0);
-    }
-
-    @Override
-    public void stop() {}
+    @Override public void start() { setPathState(0); }
+    @Override public void stop() {}
 }

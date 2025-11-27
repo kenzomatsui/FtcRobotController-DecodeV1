@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.drive.teleop;
 
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -27,9 +28,8 @@ public class ProtTeleOp extends OpMode {
         shooter.Shoot(gamepad1.right_trigger);
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
         shooter.SHOOTERDAvi(gamepad1.b);
-        telemetry.addData("Shoota3 Ativo", shooter.activate);
-        telemetry.addData("Ciclo Finalizado", shooter.cicloFinalizado);
         telemetry.update();
+
     }
 }
 

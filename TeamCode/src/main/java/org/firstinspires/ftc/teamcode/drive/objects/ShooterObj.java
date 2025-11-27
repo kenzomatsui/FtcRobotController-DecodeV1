@@ -16,7 +16,7 @@ public class ShooterObj {
 
     private static final double DISTANCIA_BOLA = 138; // mm sensor de ball no slot final
 
-    private static final double KP = 0.08, KI = 0.0, KD = 0.002;
+    private static final double KP = 0.06, KI = 0.0, KD = 0.002;
     private static final double TOLERANCIA = 0.5, XMAX_POWER = 0.5;
 
     private static final double MIN_POWER = 0.35, MAX_POWER = 1.0;
@@ -46,14 +46,14 @@ public class ShooterObj {
     public boolean cicloFinalizado = false;
 
     public ShooterObj(HardwareMap hardwareMap) {
-
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         limelight.start();
         limelight.pipelineSwitch(7);
 
         rotationMotorX = hardwareMap.get(DcMotorEx.class, "RMX");
-        rotationMotorX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rotationMotorX.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rotationMotorX.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         shooterD = hardwareMap.get(DcMotorEx.class, "RMTa");
         shooterD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -87,7 +87,7 @@ public class ShooterObj {
 
     // ------------------- ALINHAMENTO ---------------------------
 
-    private void alignToTarget(LLResult result) {
+    public void alignToTarget(LLResult result) {
 
         double tx = result.getTx();
         double error = tx;
@@ -98,7 +98,7 @@ public class ShooterObj {
         integral += error * dt;
         double derivative = (error - lastError) / dt;
 
-        double power = KP * error + KI * integral + KD * derivative;
+        double power = (KP * error + KI * integral + KD * derivative);
         power = Math.max(-XMAX_POWER, Math.min(power, XMAX_POWER));
 
         if (Math.abs(error) > TOLERANCIA) {
@@ -115,7 +115,7 @@ public class ShooterObj {
         if (vai) {
             Shoot(1);
             intake.setPower(-1);
-            sleep(1000);
+            sleep(1200);
             Shoot(1);
             intake.setPower(-1);
             sleep(1200);
@@ -136,13 +136,25 @@ public class ShooterObj {
 
         power = Math.max(MIN_POWER, Math.min(power, MAX_POWER));
 
-        if (ta >= TARGET_TA) shooterD.setPower(0);
-        else shooterD.setPower(power);
+        if (ta >= TARGET_TA) {
+            shooterD.setPower(0);
+        }else{
+            shooterD.setPower(power);
+        }
     }
 
 
     // ------------------- DETECÇÃO DE BOLA ----------------------
+    public void testMotor(){
+        double dist = sensorDistance.getDistance(DistanceUnit.MM);
 
+        if (dist < DISTANCIA_BOLA){
+            indexer.setPower(0);
+        }else {
+            sleep(600);
+            indexer.setPower(0.9);
+        }
+    }
     public void detectBall() {
 
         double dist = sensorDistance.getDistance(DistanceUnit.MM);
@@ -168,6 +180,21 @@ public class ShooterObj {
         }
     }
 
+    public void indexerAuto() {
+        double dist = sensorDistance.getDistance(DistanceUnit.MM);
+
+        if (dist < DISTANCIA_BOLA) {
+            indexer.setPower(0.7);  // Empurra bola até posição
+            temBola = true;
+        } else {
+            indexer.setPower(0);    // Para se não tem bola
+            temBola = false;
+        }
+    }
+
+
+
+
 
     public double getDistance() {
         return sensorDistance.getDistance(DistanceUnit.MM);
@@ -189,6 +216,9 @@ public class ShooterObj {
 
         if (!temBola) indexer.setPower(0.7);
         else indexer.setPower(0);
+    }
+    public void setShooterPowerLow(double pooi){
+        shooterD.setPower(pooi);
     }
 
 
@@ -264,6 +294,25 @@ public class ShooterObj {
         if (result != null && result.isValid()) {
             alignToTarget(result);
             controlShooterPower(result);
-        } else stopAll();
+        } else {
+            stopAll();
+        }
+    }
+    public void stopBase(){
+        double position = rotationMotorX.getCurrentPosition();
+        if (position > 0){
+            rotationMotorX.setPower(-0.7);
+        }
+        if (position < 0){
+            rotationMotorX.setPower(0.7);
+        }
+    }
+    public void justAim(){
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
+            alignToTarget(result);
+        } else {
+            stopAll();
+        }
     }
 }
