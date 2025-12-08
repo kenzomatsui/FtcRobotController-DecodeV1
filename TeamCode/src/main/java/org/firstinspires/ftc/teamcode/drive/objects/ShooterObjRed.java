@@ -12,15 +12,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public class ShooterObj {
+public class ShooterObjRed {
 
     private static final double DISTANCIA_BOLA = 138; // mm sensor de ball no slot final
 
-    private static final double KP = 0.006, KI = 0.0, KD = 0.0025;
-    private static final double TOLERANCIA = 0.5, XMAX_POWER = 0.5;
+    private static final double KP = 0.03, KI = 0.0, KD = 0.0025;
+    private static final double TOLERANCIA = 0.3, XMAX_POWER = 1; //Alteração de 20 de tolerância do Heitor
 
-    private static final double MIN_POWER = 0.35, MAX_POWER = 1.0;
-    private static final double TARGET_TA = 5.0, SCALE_FACTOR = 0.08;
+    private static final double MIN_POWER = 0.4, MAX_POWER = 1.0;
+    private static final double TARGET_TA = 5.0, SCALE_FACTOR = 0.09;
 
     // Tempos (ajustáveis)
     private static final long SHOOTER_RECOVERY_TIME = 900;     // tempo para o shooter recuperar
@@ -45,11 +45,11 @@ public class ShooterObj {
     public boolean activate = false;
     public boolean cicloFinalizado = false;
 
-    public ShooterObj(HardwareMap hardwareMap) {
+    public ShooterObjRed(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         limelight.start();
-        limelight.pipelineSwitch(7);
+        limelight.pipelineSwitch(8);
 
         rotationMotorX = hardwareMap.get(DcMotorEx.class, "RMX");
         rotationMotorX.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -89,7 +89,7 @@ public class ShooterObj {
 
     public void alignToTarget(LLResult result) {
 
-        double tx = result.getTx();
+        tx = result.getTx();
         double error = tx;
 
         long now = System.currentTimeMillis();
@@ -98,36 +98,37 @@ public class ShooterObj {
         integral += error * dt;
         double derivative = (error - lastError) / dt;
 
-        double power = (KP * error + KI * integral + KD * derivative);
+        power = (KP * error + KI * integral + KD * derivative);
         power = Math.max(-XMAX_POWER, Math.min(power, XMAX_POWER));
 
         if (Math.abs(error) > TOLERANCIA) {
             rotationMotorX.setPower(power);
         } else {
-            rotationMotorX.setPower(0);
-            integral = 0;
+            //rotationMotorX.setPower(0);
+            //integral = 0; <=HEITOR UNIMATE
         }
-        rotationMotorX.setPower(power);
 
         lastError = error;
         lastTime = now;
     }
-    public void voltaIndex(double pat) {
-        indexer.setPower(-pat);
-
+    double tx = 0;
+    double power = 0;
+    public double getTx(){
+        return tx;
     }
-
-    //public double get_power() {return power;}
+    public double getPower(){
+        return power;
+    }
     public void SHOOTERDAvi(boolean vai){
         intake.setPower(-1);
         if (vai) {
             sleep(500);
             Shoot(1);
-            sleep(500);
+            sleep(1000);
             Shoot(1);
-            sleep(500);
+            sleep(1000);
             Shoot(1);
-            sleep(500);
+            sleep(1000);
             Shoot(1);
         }
     }
@@ -226,15 +227,6 @@ public class ShooterObj {
             controlShooterPower(result);
         } else {
             stopAll();
-        }
-    }
-    public void stopBase(){
-        double position = rotationMotorX.getCurrentPosition();
-        if (position > 0){
-            rotationMotorX.setPower(-0.7);
-        }
-        if (position < 0){
-            rotationMotorX.setPower(0.7);
         }
     }
     public void justAim(){

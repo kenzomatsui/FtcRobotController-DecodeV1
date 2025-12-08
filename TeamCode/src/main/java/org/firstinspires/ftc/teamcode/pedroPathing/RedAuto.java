@@ -14,8 +14,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.drive.objects.Intake;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObj;
 
-@Autonomous(name = "Blue Auto", group = "Examples")
-public class BlueAuto extends OpMode {
+@Autonomous(name = "Red Auto", group = "Examples")
+public class RedAuto extends OpMode {
 
     private Follower follower;
     private Timer pathTimer;
@@ -29,16 +29,16 @@ public class BlueAuto extends OpMode {
     private int pathState = 0;
 
     // ---------------------- POSES ----------------------
-    private final Pose startPose       = new Pose(24, 129, Math.toRadians(140)); //120
-    private final Pose scorePose       = new Pose(65, 90,  Math.toRadians(135));//86
+    private final Pose startPose       = new Pose(120, 129, Math.toRadians(40)); //120
+    private final Pose scorePose       = new Pose(79, 54,  Math.toRadians(55));//86
 
-    private final Pose pickup2Pose     = new Pose(47, 61,  Math.toRadians(180));//97
-    private final Pose endPickup2Pose  = new Pose(18, 61,  Math.toRadians(180));//126
+    private final Pose pickup2Pose     = new Pose(97, 61,  Math.toRadians(0));//97
+    private final Pose endPickup2Pose  = new Pose(126, 61,  Math.toRadians(0));//126
 
-    private final Pose pickup3Pose     = new Pose(47, 37, Math.toRadians(180));
-    private final Pose endPickup3Pose  = new Pose(18, 37, Math.toRadians(180));
+    private final Pose pickup3Pose     = new Pose(47, 37, Math.toRadians(0));
+    private final Pose endPickup3Pose  = new Pose(18, 37, Math.toRadians(0));
 
-    private final Pose endPickup1Pose  = new Pose(16, 85, Math.toRadians(190));//125
+    private final Pose endPickup1Pose  = new Pose(125, 85, Math.toRadians(0));//125
 
     // ------------------- PATHS -------------------
     private Path toScore;
@@ -108,15 +108,23 @@ public class BlueAuto extends OpMode {
             // SCORE → PICKUP1 (alta velocidade + coleta lenta)
             case 1:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(1);
+                    sleep(1700);
+                    shooter.SHOOTERDAvi(true);
+
+                    follower.setMaxPower(0.5);
                     follower.followPath(toPickup1_endSlow);
                     setPathState(2);
+
+                    indexer_work = true;
+                    intake.Coleta(-1,0);
                 }
                 break;
 
             // END PICKUP1 → SCORE
             case 2:
                 if (!follower.isBusy()) {
+                    intake.Coleta(0,0);
+
                     follower.setMaxPower(1);
                     follower.followPath(pickup1_toScore);
                     setPathState(3);
@@ -126,6 +134,8 @@ public class BlueAuto extends OpMode {
             // SCORE → PICKUP2 HIGH SPEED
             case 3:
                 if (!follower.isBusy()) {
+                    shooter.SHOOTERDAvi(true);
+
                     follower.setMaxPower(1);
                     follower.followPath(toPickup2_high);
                     setPathState(4);
@@ -135,15 +145,19 @@ public class BlueAuto extends OpMode {
             // PICKUP2 SLOW
             case 4:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(1);
+                    follower.setMaxPower(0.3);
                     follower.followPath(toPickup2_endSlow);
                     setPathState(5);
+
+                    indexer_work = true;
+                    intake.Coleta(-1,0);
                 }
                 break;
 
             // END PICKUP2 → SCORE
             case 5:
                 if (!follower.isBusy()) {
+                    intake.Coleta(0,0);
                     follower.setMaxPower(1.0);
                     follower.followPath(pickup2_toScore);
                     setPathState(6);
@@ -153,6 +167,7 @@ public class BlueAuto extends OpMode {
             // SCORE → PICKUP3 HIGH SPEED
             case 6:
                 if (!follower.isBusy()) {
+                    shooter.SHOOTERDAvi(true);
                     follower.setMaxPower(1.0);
                     follower.followPath(toPickup3_high);
                     setPathState(7);
@@ -162,7 +177,7 @@ public class BlueAuto extends OpMode {
             // PICKUP3 SLOW
             case 7:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(1);
+                    follower.setMaxPower(0.25);
                     follower.followPath(toPickup3_endSlow);
                     setPathState(8);
                 }
@@ -194,7 +209,14 @@ public class BlueAuto extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-        //shooter.setShooterPowerLow(0.75);
+        shooter.setShooterPowerLow(0.75);
+
+        if(indexer_work){
+            shooter.testMotor();
+        }
+        if (base_lock){
+            shooter.stopBase();
+        }
 
         telemetry.addData("State", pathState);
         telemetry.update();

@@ -7,18 +7,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.drive.objects.FieldOrientedDrive;
 import org.firstinspires.ftc.teamcode.drive.objects.Intake;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObj;
+import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjRed;
 
 @TeleOp
-public class ProtTeleOp extends OpMode {
+public class ProtTeleOpRed extends OpMode {
     FieldOrientedDrive fod;
-    ShooterObj shooter;
+    ShooterObjRed shooter;
     Intake intake;
 
 
     public void init() {
         fod = new FieldOrientedDrive(hardwareMap);
-        shooter = new ShooterObj(hardwareMap);
+        shooter = new ShooterObjRed(hardwareMap);
         intake = new Intake(hardwareMap);
+        shooter.update(); //<--Adição para teste
     }
 
     public void loop() {
@@ -27,7 +29,8 @@ public class ProtTeleOp extends OpMode {
         shooter.detectBall();
         shooter.Shoot(gamepad1.right_trigger);
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
-        shooter.SHOOTERDAvi(gamepad1.b);
+        telemetry.addData("Tx: ", shooter.getTx());
+        telemetry.addData("Power: ", shooter.getPower());
         telemetry.update();
 
     }
