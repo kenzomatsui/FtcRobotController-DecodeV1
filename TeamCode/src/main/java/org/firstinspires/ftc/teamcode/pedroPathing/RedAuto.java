@@ -109,7 +109,7 @@ public class RedAuto extends OpMode {
             case 1:
                 if (!follower.isBusy()) {
                     sleep(1700);
-                    shooter.SHOOTERDAvi(true);
+                    shooter.SHOOTER3(true);
 
                     follower.setMaxPower(0.5);
                     follower.followPath(toPickup1_endSlow);
@@ -134,7 +134,7 @@ public class RedAuto extends OpMode {
             // SCORE → PICKUP2 HIGH SPEED
             case 3:
                 if (!follower.isBusy()) {
-                    shooter.SHOOTERDAvi(true);
+                    shooter.SHOOTER3(true);
 
                     follower.setMaxPower(1);
                     follower.followPath(toPickup2_high);
@@ -167,7 +167,7 @@ public class RedAuto extends OpMode {
             // SCORE → PICKUP3 HIGH SPEED
             case 6:
                 if (!follower.isBusy()) {
-                    shooter.SHOOTERDAvi(true);
+                    shooter.SHOOTER3(true);
                     follower.setMaxPower(1.0);
                     follower.followPath(toPickup3_high);
                     setPathState(7);
@@ -213,9 +213,6 @@ public class RedAuto extends OpMode {
 
         if(indexer_work){
             shooter.testMotor();
-        }
-        if (base_lock){
-            shooter.stopBase();
         }
 
         telemetry.addData("State", pathState);

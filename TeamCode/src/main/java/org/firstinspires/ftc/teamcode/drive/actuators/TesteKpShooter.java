@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -28,6 +29,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * 2. O motor deve estar configurado no arquivo de configuração do robô com o nome "motor_distancia".
  * 3. O pipeline da Limelight deve estar ativo.
  */
+@Disabled
 @Config
 @TeleOp(name = "Limelight AprilTag Motor Control (FTC SDK V2)", group = "Limelight")
 public class TesteKpShooter extends LinearOpMode {

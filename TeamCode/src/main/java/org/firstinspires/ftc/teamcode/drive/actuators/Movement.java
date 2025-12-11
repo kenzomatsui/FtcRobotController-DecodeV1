@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
+@Disabled
 public class Movement extends OpMode {
     DcMotor backLeft;
     DcMotor backRight;

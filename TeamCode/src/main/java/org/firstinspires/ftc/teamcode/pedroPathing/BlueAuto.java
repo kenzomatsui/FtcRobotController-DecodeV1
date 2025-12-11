@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
-import static android.os.SystemClock.sleep;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -38,7 +36,7 @@ public class BlueAuto extends OpMode {
     private final Pose pickup3Pose     = new Pose(47, 37, Math.toRadians(180));
     private final Pose endPickup3Pose  = new Pose(18, 37, Math.toRadians(180));
 
-    private final Pose endPickup1Pose  = new Pose(16, 85, Math.toRadians(190));//125
+    private final Pose endPickup1Pose  = new Pose(16, 85, Math.toRadians(185));//125
 
     // ------------------- PATHS -------------------
     private Path toScore;
@@ -102,13 +100,19 @@ public class BlueAuto extends OpMode {
             case 0:
                 follower.setMaxPower(1.0);
                 follower.followPath(toScore);
-                setPathState(1);
+                setPathState(10);
                 break;
 
+            case 10:
+                if (!follower.isBusy()) {
+                    shooter.SHOOTER3(true);
+                    setPathState(1);
+                }
             // SCORE → PICKUP1 (alta velocidade + coleta lenta)
             case 1:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(1);
+                    intake.intake.setPower(-1);
+                    follower.setMaxPower(0.3);
                     follower.followPath(toPickup1_endSlow);
                     setPathState(2);
                 }
@@ -122,6 +126,10 @@ public class BlueAuto extends OpMode {
                     setPathState(3);
                 }
                 break;
+            case 11:
+                if (!follower.isBusy()){
+                    shooter.SHOOTER3(true);
+                }
 
             // SCORE → PICKUP2 HIGH SPEED
             case 3:
@@ -194,7 +202,11 @@ public class BlueAuto extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-        //shooter.setShooterPowerLow(0.75);
+        if(indexer_work){
+            shooter.testMotor();
+        }
+
+        shooter.setShooterPowerLow(0.9);
 
         telemetry.addData("State", pathState);
         telemetry.update();

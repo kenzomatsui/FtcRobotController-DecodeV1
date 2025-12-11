@@ -27,6 +27,6 @@ public class TesteMotor extends OpMode {
 
         telemetry.addData("Potência", power);
         telemetry.addData("Current Position: ", (motor.getCurrentPosition()));
-        telemetry.update();
+        telemetry.update(); 
     }
 }

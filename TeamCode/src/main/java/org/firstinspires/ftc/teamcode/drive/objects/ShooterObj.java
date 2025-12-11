@@ -19,7 +19,7 @@ public class ShooterObj {
     private static final double KP = 0.006, KI = 0.0, KD = 0.0025;
     private static final double TOLERANCIA = 0.5, XMAX_POWER = 0.5;
 
-    private static final double MIN_POWER = 0.35, MAX_POWER = 1.0;
+    private static final double MIN_POWER = 0.4, MAX_POWER = 1.0;
     private static final double TARGET_TA = 5.0, SCALE_FACTOR = 0.08;
 
     // Tempos (ajustáveis)
@@ -40,10 +40,6 @@ public class ShooterObj {
     public boolean temBola = false;
     private boolean timing = false;
     private long detectStart = 0;
-
-    // SHOOTA3 toggle
-    public boolean activate = false;
-    public boolean cicloFinalizado = false;
 
     public ShooterObj(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -112,22 +108,18 @@ public class ShooterObj {
         lastError = error;
         lastTime = now;
     }
-    public void voltaIndex(double pat) {
-        indexer.setPower(-pat);
-
-    }
 
     //public double get_power() {return power;}
-    public void SHOOTERDAvi(boolean vai){
+    public void SHOOTER3(boolean vai){
         intake.setPower(-1);
         if (vai) {
             sleep(500);
             Shoot(1);
-            sleep(500);
+            sleep(200);
             Shoot(1);
-            sleep(500);
+            sleep(200);
             Shoot(1);
-            sleep(500);
+            sleep(200);
             Shoot(1);
         }
     }
@@ -224,23 +216,6 @@ public class ShooterObj {
         if (result != null && result.isValid()) {
             //alignToTarget(result);
             controlShooterPower(result);
-        } else {
-            stopAll();
-        }
-    }
-    public void stopBase(){
-        double position = rotationMotorX.getCurrentPosition();
-        if (position > 0){
-            rotationMotorX.setPower(-0.7);
-        }
-        if (position < 0){
-            rotationMotorX.setPower(0.7);
-        }
-    }
-    public void justAim(){
-        LLResult result = limelight.getLatestResult();
-        if (result != null && result.isValid()) {
-            alignToTarget(result);
         } else {
             stopAll();
         }
