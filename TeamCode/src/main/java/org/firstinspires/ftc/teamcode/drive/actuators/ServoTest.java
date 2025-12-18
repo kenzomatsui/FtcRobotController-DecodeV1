@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class ServoTest extends OpMode {
     Servo servo;
     public void init(){
-        servo = hardwareMap.get(Servo.class, "ser");
+        servo = hardwareMap.get(Servo.class, "servoLeftName");
         telemetry.addData("Status: ", "Ready");
     }
     public void loop(){
