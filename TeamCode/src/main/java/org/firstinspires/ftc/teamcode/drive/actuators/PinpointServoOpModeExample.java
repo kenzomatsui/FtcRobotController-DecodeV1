@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.drive.actuators;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.drive.objects.PinpointServoController;
  * O robô tentará manter o ângulo de guinada (heading) em 0 graus,
  * movendo os servos em contraesterço para compensar a rotação.
  */
+@Disabled
 @TeleOp(name = "Pinpoint Servo Example", group = "TeamCode")
 public class PinpointServoOpModeExample extends LinearOpMode {
 

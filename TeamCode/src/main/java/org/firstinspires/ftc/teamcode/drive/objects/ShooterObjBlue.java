@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public class ShooterObj {
+public class ShooterObjBlue {
 
     private static final double DISTANCIA_BOLA = 138; // mm sensor de ball no slot final
 
@@ -41,7 +41,7 @@ public class ShooterObj {
     private boolean timing = false;
     private long detectStart = 0;
 
-    public ShooterObj(HardwareMap hardwareMap) {
+    public ShooterObjBlue(HardwareMap hardwareMap) {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
         limelight.start();

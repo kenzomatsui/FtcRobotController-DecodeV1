@@ -4,17 +4,17 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.drive.objects.ShooterObj;
+import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 
 @Disabled
 @TeleOp(name = "ShooterPOO", group = "Drive")
 public class Shooter extends LinearOpMode {
 
-    private ShooterObj shooter; // Objeto da classe Shooter
+    private ShooterObjBlue shooter; // Objeto da classe Shooter
 
     @Override
     public void runOpMode() {
-        shooter = new ShooterObj(hardwareMap); // Inicializa o sistema
+        shooter = new ShooterObjBlue(hardwareMap); // Inicializa o sistema
 
         telemetry.addData("Status", "Inicializado");
         telemetry.update();

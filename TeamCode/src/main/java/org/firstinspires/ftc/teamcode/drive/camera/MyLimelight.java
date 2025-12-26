@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode.drive.objects.Outtake;
+import org.firstinspires.ftc.teamcode.drive.unused.Outtake;
 @Disabled
 @Autonomous
 public class MyLimelight extends LinearOpMode {

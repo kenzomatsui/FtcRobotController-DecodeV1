@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.drive.objects.Intake;
-import org.firstinspires.ftc.teamcode.drive.objects.ShooterObj;
+import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 
 @Autonomous(name = "Blue Auto", group = "Examples")
 public class BlueAuto extends OpMode {
@@ -22,7 +22,7 @@ public class BlueAuto extends OpMode {
     boolean base_lock = false;
 
     private Intake intake;
-    private ShooterObj shooter;
+    private ShooterObjBlue shooter;
 
     private int pathState = 0;
 
@@ -108,7 +108,7 @@ public class BlueAuto extends OpMode {
                     shooter.SHOOTER3(true);
                     setPathState(1);
                 }
-            // SCORE → PICKUP1 (alta velocidade + coleta lenta)
+            // SCORE → PICKUP1 (baixa velocidade + coleta lenta)
             case 1:
                 if (!follower.isBusy()) {
                     intake.intake.setPower(-1);
@@ -220,7 +220,7 @@ public class BlueAuto extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
         intake   = new Intake(hardwareMap);
-        shooter  = new ShooterObj(hardwareMap);
+        shooter  = new ShooterObjBlue(hardwareMap);
 
         follower.setStartingPose(startPose);
         buildPaths();

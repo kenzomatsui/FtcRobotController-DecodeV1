@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.drive.objects.Intake;
-import org.firstinspires.ftc.teamcode.drive.objects.ShooterObj;
+import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 
 @Autonomous(name = "Red Auto", group = "Examples")
 public class RedAuto extends OpMode {
@@ -24,7 +24,7 @@ public class RedAuto extends OpMode {
     boolean base_lock = false;
 
     private Intake intake;
-    private ShooterObj shooter;
+    private ShooterObjBlue shooter;
 
     private int pathState = 0;
 
@@ -227,7 +227,7 @@ public class RedAuto extends OpMode {
 
         follower = Constants.createFollower(hardwareMap);
         intake   = new Intake(hardwareMap);
-        shooter  = new ShooterObj(hardwareMap);
+        shooter  = new ShooterObjBlue(hardwareMap);
 
         follower.setStartingPose(startPose);
         buildPaths();
