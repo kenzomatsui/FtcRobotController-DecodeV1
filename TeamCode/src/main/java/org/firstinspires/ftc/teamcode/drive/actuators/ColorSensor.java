@@ -152,6 +152,9 @@ public class ColorSensor extends LinearOpMode {
             } else {
                 index.setPower(1);
             }
+            if (gamepad1.right_trigger>0.1){
+                index.setPower(1);
+            }
 
             /* Use telemetry to display feedback on the driver station. We show the red, green, and blue
              * normalized values from the sensor (in the range of 0 to 1), as well as the equivalent

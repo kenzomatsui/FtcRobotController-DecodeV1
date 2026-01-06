@@ -18,13 +18,11 @@ public class ProtTeleOpBlue extends OpMode {
         fod = new FieldOrientedDrive(hardwareMap);
         shooter = new ShooterObjBlue(hardwareMap);
         intake = new Intake(hardwareMap);
-        shooter.update();
     }
 
     public void loop() {
         fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_bumper);
         shooter.aimAndShoot();
-        shooter.detectBall();
         shooter.Shoot(gamepad1.right_trigger);
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
         //telemetry.addData("Power: ", shooter.get_power());

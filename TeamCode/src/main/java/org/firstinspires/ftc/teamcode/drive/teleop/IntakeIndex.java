@@ -19,6 +19,5 @@ public class IntakeIndex extends OpMode {
     }
     public void loop(){
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
-        telemetry.addData("Sensor: ", shooter.sensorDistance.getDistance(DistanceUnit.MM));
     }
 }

@@ -25,7 +25,6 @@ public class Shooter extends LinearOpMode {
 
             shooter.aimAndShoot(); // Faz o alinhamento e o disparo com base na Limelight
 
-            telemetry.addData("Distância", shooter.getDistance());
             telemetry.update();
         }
     }
