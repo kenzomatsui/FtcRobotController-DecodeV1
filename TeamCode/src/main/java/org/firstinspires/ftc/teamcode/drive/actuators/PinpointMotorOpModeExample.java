@@ -30,7 +30,7 @@ public class PinpointMotorOpModeExample extends LinearOpMode {
         motorController.init(hardwareMap, PINPOINT_NAME, MOTOR_NAME);
 
         // Configurações opcionais
-        motorController.setLimits(-45.0, 45.0); // Define a zona de graus
+        motorController.setLimits(-150.0, 150.0); // Define a zona de graus
         motorController.setAutoReverse(true);    // Ativa a inversão automática nos limites
 
         telemetry.addData("Status", "Inicialização completa. Pressione Play.");
