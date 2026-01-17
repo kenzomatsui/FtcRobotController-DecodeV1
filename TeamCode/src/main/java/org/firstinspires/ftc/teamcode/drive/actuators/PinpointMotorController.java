@@ -17,9 +17,9 @@ public class PinpointMotorController {
     private DcMotorEx motor;
 
     // Parâmetros PID para motor 15:1
-    private double kP = 0.01;
+    private double kP = 0.04;
     private double kI = 0.0;
-    private double kD = 0.001;
+    private double kD = 0.0005;
 
     private double integralSum = 0;
     private double lastError = 0;
