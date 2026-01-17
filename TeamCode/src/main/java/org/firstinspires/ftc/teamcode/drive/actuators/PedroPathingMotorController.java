@@ -17,7 +17,7 @@ public class PedroPathingMotorController {
     private DcMotorEx motor;
 
     // Parâmetros PID para motor 15:1
-    private double kP = 0.04;
+    private double kP = 0.06;
     private double kI = 0.0;
     private double kD = 0.0005;
 
@@ -32,8 +32,8 @@ public class PedroPathingMotorController {
     private boolean movingTowardsMax = true;
 
     // Coordenadas do Alvo (Poste) no Campo (Pedro Pathing usa polegadas por padrão)
-    private double targetX = 72; // Exemplo: Centro do campo em Pedro Pathing
-    private double targetY = 72;
+    private double targetX = 0; // Exemplo: Centro do campo em Pedro Pathing
+    private double targetY = 50;
 
     // Redução Total 15:1
     // HD Hex (28 ticks/rev no encoder interno) * 3 (UltraPlanetary) * 5 (Engrenagem externa)
@@ -66,8 +66,8 @@ public class PedroPathingMotorController {
         Pose currentPose = follower.getPose();
 
         // 1. Calcular o ângulo do robô em relação ao alvo (Field Centric)
-        double dx = targetX - currentPose.getX();
-        double dy = targetY - currentPose.getY();
+        double dx = targetX + currentPose.getX();
+        double dy = targetY + currentPose.getY();
 
         // Ângulo absoluto do alvo em relação ao campo (Pedro Pathing usa radianos)
         double absoluteAngleToTarget = Math.atan2(dy, dx);

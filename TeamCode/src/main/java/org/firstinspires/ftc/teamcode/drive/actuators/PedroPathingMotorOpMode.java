@@ -22,8 +22,8 @@ public class PedroPathingMotorOpMode extends LinearOpMode {
     private static final String MOTOR_NAME = "RMX";
 
     // Alvo inicial (Pedro Pathing usa polegadas, 72,72 é o centro do campo)
-    private double targetX = 72.0;
-    private double targetY = 72.0;
+    private double targetX = 0;
+    private double targetY = 116;
     private boolean aButtonPreviousState = false;
 
     @Override
@@ -31,7 +31,7 @@ public class PedroPathingMotorOpMode extends LinearOpMode {
         // 1. Inicializar Pedro Pathing Follower
         // Certifique-se de que sua classe Constants está configurada corretamente
         follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(0, 0, 0)); // Ajuste conforme sua posição inicial
+        follower.setStartingPose(new Pose(7, 7, 0)); // Ajuste conforme sua posição inicial
 
         // 2. Inicializar Controlador da Turret
         turretController.init(hardwareMap, follower, MOTOR_NAME);
