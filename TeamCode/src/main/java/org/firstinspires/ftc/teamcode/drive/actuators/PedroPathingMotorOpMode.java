@@ -4,8 +4,8 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingMotorController;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 /**
