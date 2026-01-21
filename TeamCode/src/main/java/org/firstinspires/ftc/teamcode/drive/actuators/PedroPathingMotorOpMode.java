@@ -36,8 +36,7 @@ public class PedroPathingMotorOpMode extends LinearOpMode {
         // 2. Inicializar Controlador da Turret
         turretController.init(hardwareMap, follower, MOTOR_NAME);
         turretController.setTargetPosition(targetX, targetY);
-        turretController.setLimits(-150.0, 150.0);
-        turretController.setAutoReverse(true);
+        turretController.setLimits(0, 180);
 
         telemetry.addData("Status", "Inicializado. Pedro Pathing Ativo.");
         telemetry.update();

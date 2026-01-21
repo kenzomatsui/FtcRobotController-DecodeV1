@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.drive.objects.FieldOrientedDrive;
 import org.firstinspires.ftc.teamcode.drive.objects.Intake;
 import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingMotorController;
+import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingShooterController;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -18,9 +19,13 @@ public class ProtTeleOpBlue extends OpMode {
     Intake intake;
     private Follower follower;
     private PedroPathingMotorController turretController = new PedroPathingMotorController();
+    private PedroPathingShooterController shooterController = new PedroPathingShooterController();
+
 
     // Nomes de configuração
     private static final String MOTOR_NAME = "RMX";
+    private static final String SHOOTER_MOTOR = "RMTa"; // Ajuste conforme seu hardware
+
 
     // Alvo inicial: gol azul
     private double targetX = 0;
@@ -39,8 +44,13 @@ public class ProtTeleOpBlue extends OpMode {
         // 2. Inicializar Controlador da Turret
         turretController.init(hardwareMap, follower, MOTOR_NAME);
         turretController.setTargetPosition(targetX, targetY);
-        turretController.setLimits(-150.0, 150.0);
-        turretController.setAutoReverse(true);
+        turretController.setLimits(0.0, 180.0);
+
+        // 3. Inicializar Shooter
+        shooterController.init(hardwareMap, follower, SHOOTER_MOTOR);
+        shooterController.setTargetPosition(targetX, targetY);
+        // Configura: MinPower 0.35 a 24pol, MaxPower 0.9 a 120pol
+        shooterController.setPowerConfig(0.25, 0.90, 28.0, 120.0);
 
         telemetry.addData("Status", "Inicializado. Pedro Pathing Ativo.");
         telemetry.update();
@@ -53,6 +63,7 @@ public class ProtTeleOpBlue extends OpMode {
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
         follower.update();
         turretController.update();
+        shooterController.update();
         //telemetry.addData("Power: ", shooter.get_power());
         telemetry.update();
     }
