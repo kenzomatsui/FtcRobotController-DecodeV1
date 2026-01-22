@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.drive.objects.Intake;
 import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingMotorController;
 import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingShooterController;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathingVelho.Constants;
 
 @TeleOp
 public class ProtTeleOpBlue extends OpMode {

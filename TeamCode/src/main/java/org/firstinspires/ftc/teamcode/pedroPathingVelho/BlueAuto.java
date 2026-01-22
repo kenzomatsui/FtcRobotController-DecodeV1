@@ -1,41 +1,22 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode.pedroPathingVelho;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.util.Timer;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.drive.objects.Intake;
-import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingMotorController;
-import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingShooterController;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 
 @Autonomous(name = "Blue Auto", group = "Examples")
 public class BlueAuto extends OpMode {
 
     private Follower follower;
-    private Follower followerpp;
-    private Timer pathTimer;
-
-    boolean indexer_work = false;
-    boolean base_lock = false;
-
     private Intake intake;
     private ShooterObjBlue shooter;
-
-    private PedroPathingMotorController turretController = new PedroPathingMotorController();
-    private PedroPathingShooterController shooterController = new PedroPathingShooterController();
-    private static final String MOTOR_NAME = "RMX";
-    private static final String SHOOTER_MOTOR = "RMTa"; // Ajuste conforme seu hardware
-
-
-    // Alvo inicial: gol azul
-    private double targetX = 0;
-    private double targetY = 125;
 
 
     private int pathState = 0;
@@ -114,14 +95,9 @@ public class BlueAuto extends OpMode {
             case 0:
                 follower.setMaxPower(1.0);
                 follower.followPath(toScore);
-                setPathState(10);
+                setPathState(1);
                 break;
 
-            case 10:
-                if (!follower.isBusy()) {
-                    shooter.SHOOTER3(true);
-                    setPathState(1);
-                }
             // SCORE → PICKUP1 (baixa velocidade + coleta lenta)
             case 1:
                 if (!follower.isBusy()) {
@@ -140,11 +116,6 @@ public class BlueAuto extends OpMode {
                     setPathState(3);
                 }
                 break;
-            case 11:
-                if (!follower.isBusy()){
-                    shooter.SHOOTER3(true);
-                    setPathState(3);
-                }
 
             // SCORE → PICKUP2 HIGH SPEED
             case 3:
@@ -169,13 +140,9 @@ public class BlueAuto extends OpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(1.0);
                     follower.followPath(pickup2_toScore);
-                    setPathState(12);
+                    setPathState(6);
                 }
                 break;
-            case 12:
-                if (!follower.isBusy()){
-                    shooter.SHOOTER3(true);
-                }
 
             // SCORE → PICKUP3 HIGH SPEED
             case 6:
@@ -212,22 +179,13 @@ public class BlueAuto extends OpMode {
 
     public void setPathState(int newState) {
         pathState = newState;
-        pathTimer.resetTimer();
     }
 
     // ------------------- LOOP -------------------
     @Override
     public void loop() {
         follower.update();
-        followerpp.update();
         autonomousPathUpdate();
-
-        turretController.update();
-        shooterController.update();
-
-        if(indexer_work){
-            shooter.testMotor();
-        }
 
         telemetry.addData("State", pathState);
         telemetry.update();
@@ -236,31 +194,12 @@ public class BlueAuto extends OpMode {
     // ------------------- INIT -------------------
     @Override
     public void init() {
-        base_lock = true;
-        pathTimer = new Timer();
-
         follower = Constants.createFollower(hardwareMap);
         intake   = new Intake(hardwareMap);
         shooter  = new ShooterObjBlue(hardwareMap);
 
         follower.setStartingPose(startPose);
         buildPaths();
-
-        // 1. Inicializar Pedro Pathing Follower
-        // Certifique-se de que sua classe Constants está configurada corretamente
-        followerpp = Constants.createFollower(hardwareMap);
-        followerpp.setStartingPose(new Pose(24, 129, 140)); // Ajuste conforme sua posição inicial
-
-        // 2. Inicializar Controlador da Turret
-        turretController.init(hardwareMap, followerpp, MOTOR_NAME);
-        turretController.setTargetPosition(targetX, targetY);
-        turretController.setLimits(-60.0, 260.0);
-
-        // 3. Inicializar Shooter
-        shooterController.init(hardwareMap, followerpp, SHOOTER_MOTOR);
-        shooterController.setTargetPosition(targetX, targetY);
-        // Configura: MinPower 0.35 a 24pol, MaxPower 0.9 a 120pol
-        shooterController.setPowerConfig(0.25, 0.90, 28.0, 120.0);
     }
 
     @Override public void init_loop() {}
