@@ -47,15 +47,6 @@ public class PedroPathingMotorOpMode extends LinearOpMode {
             // Atualiza o Follower (Essencial para a odometria do Pedro Pathing)
             follower.update();
 
-            // Lógica de captura de alvo com botão 'A'
-            if (gamepad1.a && !aButtonPreviousState) {
-                Pose currentPose = turretController.getCurrentPose();
-                targetX = currentPose.getX();
-                targetY = currentPose.getY();
-                turretController.setTargetPosition(targetX, targetY);
-            }
-            aButtonPreviousState = gamepad1.a;
-
             // Atualiza a lógica de apontamento da turret
             turretController.update();
 
@@ -71,7 +62,6 @@ public class PedroPathingMotorOpMode extends LinearOpMode {
 
             telemetry.addData("--- Turret Status ---", "");
             telemetry.addData("Ângulo Motor", "%.1f°", turretController.getMotorAngle());
-            telemetry.addData("Poder", "%.2f", turretController.getMotorPower());
 
             telemetry.update();
         }

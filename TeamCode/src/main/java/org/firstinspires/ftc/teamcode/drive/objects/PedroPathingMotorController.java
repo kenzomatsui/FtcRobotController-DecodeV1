@@ -11,14 +11,14 @@ import com.qualcomm.robotcore.util.Range;
 /**
  * Controlador para base giratória (turret) integrado ao Pedro Pathing.
  * Configurado para motor HD Hex (3:1) + Engrenagem externa (5:1) = 15:1 total.
- * Lógica de limites: O motor para no limite em vez de inverter o movimento.
+ * Suporta limites estendidos (ex: -60 a 300 graus).
  */
 public class PedroPathingMotorController {
     private Follower follower;
     private DcMotorEx motor;
 
     // Parâmetros PID para motor 15:1
-    private double kP = 0.06; //assim ta bom
+    private double kP = 0.06;
     private double kI = 0.0;
     private double kD = 0.0005;
 
@@ -27,15 +27,15 @@ public class PedroPathingMotorController {
     private ElapsedTime timer = new ElapsedTime();
 
     // Configurações de Zona
-    private double minLimit = 0;
-    private double maxLimit = 180.0;
+    private double minLimit = -60.0;
+    private double maxLimit = 260.0;
 
     // Coordenadas do Alvo (Poste) no Campo (Pedro Pathing usa polegadas)
     private double targetX = 0;
-    private double targetY = 116;
+    private double targetY = 115;
 
     // Redução Total 15:1 (28 ticks * 3 * 5 = 420)
-    private static final double TICKS_PER_REV = 420.0;
+    private static final double TICKS_PER_REV = 2100.0;
 
     public void init(HardwareMap hardwareMap, Follower follower, String motorName) {
         this.follower = follower;
@@ -55,32 +55,34 @@ public class PedroPathingMotorController {
     }
 
     public void update() {
-        // Pega a posição atual do robô do Pedro Pathing
         Pose currentPose = follower.getPose();
 
-        // 1. Recalcular dx e dy a cada frame para garantir correção de translação
+        // 1. Calcular o ângulo absoluto do alvo em relação ao campo
         double dx = targetX + currentPose.getX();
         double dy = targetY + currentPose.getY();
+        double absoluteAngleToTarget = Math.toDegrees(Math.atan2(dy, dx));
 
-        // Ângulo absoluto do alvo em relação ao campo (Radianos)
-        double absoluteAngleToTarget = Math.atan2(dy, dx);
-
-        // Ângulo relativo ao robô (Robot Centric)
-        double robotHeading = currentPose.getHeading();
+        // 2. Calcular o ângulo relativo ao robô
+        double robotHeading = Math.toDegrees(currentPose.getHeading());
         double relativeTargetAngle = absoluteAngleToTarget - robotHeading;
 
-        // Normalizar o ângulo [-PI, PI]
-        relativeTargetAngle = normalizeAngle(relativeTargetAngle);
+        // 3. Normalização Inteligente para Limites Estendidos
+        // Pegamos o ângulo atual do motor para encontrar o "alvo" mais próximo dentro da continuidade circular
+        double currentMotorAngle = getMotorAngle();
 
-        // Converter para graus para a lógica de zona
-        double targetDegrees = Math.toDegrees(relativeTargetAngle);
+        // Normaliza o erro para o intervalo [-180, 180] para encontrar o caminho mais curto
+        double error = relativeTargetAngle - (currentMotorAngle % 360);
+        while (error > 180) error -= 360;
+        while (error < -180) error += 360;
 
-        // 2. Lógica de Zona: Travar nos limites
-        // Em vez de inverter, apenas limitamos o alvo para que ele nunca ultrapasse os limites físicos.
+        // O alvo real é a posição atual + o caminho mais curto
+        double targetDegrees = currentMotorAngle + error;
+
+        // 4. Lógica de Zona: Travar nos limites
+        // Agora o clip funciona corretamente mesmo para 300 graus
         double constrainedTargetDegrees = Range.clip(targetDegrees, minLimit, maxLimit);
 
-        // 3. Controle PID
-        double currentMotorAngle = getMotorAngle();
+        // 5. Controle PID
         double power = calculatePID(constrainedTargetDegrees, currentMotorAngle);
         motor.setPower(power);
     }
@@ -102,22 +104,9 @@ public class PedroPathingMotorController {
         return 0;
     }
 
-    private double normalizeAngle(double radians) {
-        while (radians > Math.PI) radians -= 2 * Math.PI;
-        while (radians < -Math.PI) radians += 2 * Math.PI;
-        return radians;
-    }
-
     public double getMotorAngle() {
+        // Retorna a posição real acumulada do motor em graus
         return (motor.getCurrentPosition() / TICKS_PER_REV) * 360.0;
-    }
-
-    public Pose getCurrentPose() {
-        return follower.getPose();
-    }
-
-    public double getMotorPower() {
-        return motor.getPower();
     }
 
     public void setLimits(double min, double max) {

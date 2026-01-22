@@ -21,9 +21,7 @@ public class Shooter extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            shooter.update(); // Atualiza o shooter a cada ciclo
 
-            shooter.aimAndShoot(); // Faz o alinhamento e o disparo com base na Limelight
 
             telemetry.update();
         }

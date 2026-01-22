@@ -209,7 +209,6 @@ public class RedAuto extends OpMode {
         follower.update();
         autonomousPathUpdate();
 
-        shooter.setShooterPowerLow(0.75);
 
         if(indexer_work){
             shooter.testMotor();

@@ -10,12 +10,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.drive.objects.Intake;
+import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingMotorController;
+import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingShooterController;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 
 @Autonomous(name = "Blue Auto", group = "Examples")
 public class BlueAuto extends OpMode {
 
     private Follower follower;
+    private Follower followerpp;
     private Timer pathTimer;
 
     boolean indexer_work = false;
@@ -24,11 +27,22 @@ public class BlueAuto extends OpMode {
     private Intake intake;
     private ShooterObjBlue shooter;
 
+    private PedroPathingMotorController turretController = new PedroPathingMotorController();
+    private PedroPathingShooterController shooterController = new PedroPathingShooterController();
+    private static final String MOTOR_NAME = "RMX";
+    private static final String SHOOTER_MOTOR = "RMTa"; // Ajuste conforme seu hardware
+
+
+    // Alvo inicial: gol azul
+    private double targetX = 0;
+    private double targetY = 125;
+
+
     private int pathState = 0;
 
     // ---------------------- POSES ----------------------
-    private final Pose startPose       = new Pose(24, 129, Math.toRadians(140)); //120
-    private final Pose scorePose       = new Pose(65, 90,  Math.toRadians(135));//86
+    private final Pose startPose       = new Pose(21, 124, Math.toRadians(140)); //120
+    private final Pose scorePose       = new Pose(59, 83,  Math.toRadians(180));//86
 
     private final Pose pickup2Pose     = new Pose(47, 61,  Math.toRadians(180));//97
     private final Pose endPickup2Pose  = new Pose(18, 61,  Math.toRadians(180));//126
@@ -129,6 +143,7 @@ public class BlueAuto extends OpMode {
             case 11:
                 if (!follower.isBusy()){
                     shooter.SHOOTER3(true);
+                    setPathState(3);
                 }
 
             // SCORE → PICKUP2 HIGH SPEED
@@ -143,7 +158,7 @@ public class BlueAuto extends OpMode {
             // PICKUP2 SLOW
             case 4:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(1);
+                    follower.setMaxPower(0.3);
                     follower.followPath(toPickup2_endSlow);
                     setPathState(5);
                 }
@@ -154,9 +169,13 @@ public class BlueAuto extends OpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(1.0);
                     follower.followPath(pickup2_toScore);
-                    setPathState(6);
+                    setPathState(12);
                 }
                 break;
+            case 12:
+                if (!follower.isBusy()){
+                    shooter.SHOOTER3(true);
+                }
 
             // SCORE → PICKUP3 HIGH SPEED
             case 6:
@@ -200,13 +219,15 @@ public class BlueAuto extends OpMode {
     @Override
     public void loop() {
         follower.update();
+        followerpp.update();
         autonomousPathUpdate();
+
+        turretController.update();
+        shooterController.update();
 
         if(indexer_work){
             shooter.testMotor();
         }
-
-        shooter.setShooterPowerLow(0.9);
 
         telemetry.addData("State", pathState);
         telemetry.update();
@@ -224,6 +245,22 @@ public class BlueAuto extends OpMode {
 
         follower.setStartingPose(startPose);
         buildPaths();
+
+        // 1. Inicializar Pedro Pathing Follower
+        // Certifique-se de que sua classe Constants está configurada corretamente
+        followerpp = Constants.createFollower(hardwareMap);
+        followerpp.setStartingPose(new Pose(24, 129, 140)); // Ajuste conforme sua posição inicial
+
+        // 2. Inicializar Controlador da Turret
+        turretController.init(hardwareMap, followerpp, MOTOR_NAME);
+        turretController.setTargetPosition(targetX, targetY);
+        turretController.setLimits(-60.0, 260.0);
+
+        // 3. Inicializar Shooter
+        shooterController.init(hardwareMap, followerpp, SHOOTER_MOTOR);
+        shooterController.setTargetPosition(targetX, targetY);
+        // Configura: MinPower 0.35 a 24pol, MaxPower 0.9 a 120pol
+        shooterController.setPowerConfig(0.25, 0.90, 28.0, 120.0);
     }
 
     @Override public void init_loop() {}

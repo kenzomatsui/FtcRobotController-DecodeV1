@@ -20,12 +20,12 @@ public class PedroPathingShooterController {
     private double targetY = 116;
 
     // Limites de Potência
-    private double minPower = 0.25;
+    private double minPower = 0.2;
     private double maxPower = 0.95;
 
     // Distâncias de Referência (em polegadas)
     // Ajuste conforme os testes na arena
-    private double minDistance = 28.0; // Distância onde a potência é mínima (0.35)
+    private double minDistance = 30.0; // Distância onde a potência é mínima (0.35)
     private double maxDistance = 120.0; // Distância onde a potência é máxima (0.90)
 
     public void init(HardwareMap hardwareMap, Follower follower, String motorName) {

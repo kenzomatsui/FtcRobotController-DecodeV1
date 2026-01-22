@@ -29,7 +29,7 @@ public class ProtTeleOpBlue extends OpMode {
 
     // Alvo inicial: gol azul
     private double targetX = 0;
-    private double targetY = 116;
+    private double targetY = 114;
 
     public void init() {
         fod = new FieldOrientedDrive(hardwareMap);
@@ -44,7 +44,7 @@ public class ProtTeleOpBlue extends OpMode {
         // 2. Inicializar Controlador da Turret
         turretController.init(hardwareMap, follower, MOTOR_NAME);
         turretController.setTargetPosition(targetX, targetY);
-        turretController.setLimits(0.0, 180.0);
+        turretController.setLimits(-60.0, 260.0);
 
         // 3. Inicializar Shooter
         shooterController.init(hardwareMap, follower, SHOOTER_MOTOR);
@@ -58,13 +58,16 @@ public class ProtTeleOpBlue extends OpMode {
 
     public void loop() {
         fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_bumper);
-        //shooter.aimAndShoot();
+
         shooter.Shoot(gamepad1.right_trigger);
+        shooter.SHOOTER3(gamepad1.a);
+
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
+
         follower.update();
         turretController.update();
         shooterController.update();
-        //telemetry.addData("Power: ", shooter.get_power());
+
         telemetry.update();
     }
 }
