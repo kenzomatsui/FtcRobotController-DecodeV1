@@ -17,6 +17,7 @@ public class ProtTeleOpBlue extends OpMode {
     FieldOrientedDrive fod;
     ShooterObjBlue shooter;
     Intake intake;
+
     private Follower follower;
     private PedroPathingMotorController turretController = new PedroPathingMotorController();
     private PedroPathingShooterController shooterController = new PedroPathingShooterController();
@@ -67,6 +68,7 @@ public class ProtTeleOpBlue extends OpMode {
         follower.update();
         turretController.update();
         shooterController.update();
+        telemetry.addData("Power: ", shooterController.getCurrentPower()); //Alteração
 
         telemetry.update();
     }

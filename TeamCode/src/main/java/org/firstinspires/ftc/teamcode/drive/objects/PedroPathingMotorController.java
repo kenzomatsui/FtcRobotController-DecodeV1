@@ -31,8 +31,8 @@ public class PedroPathingMotorController {
     private double maxLimit = 260.0;
 
     // Coordenadas do Alvo (Poste) no Campo (Pedro Pathing usa polegadas)
-    private double targetX = 0;
-    private double targetY = 115;
+    private double targetX = 10;
+    private double targetY = 100;
 
     // Redução Total 15:1 (28 ticks * 3 * 5 = 420)
     private static final double TICKS_PER_REV = 2100.0;

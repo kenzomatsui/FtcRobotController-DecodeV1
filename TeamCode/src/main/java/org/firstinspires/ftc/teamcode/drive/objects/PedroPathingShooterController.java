@@ -16,8 +16,8 @@ public class PedroPathingShooterController {
     private DcMotorEx shooterMotor;
 
     // Coordenadas do Alvo (Poste/Cesta) no Campo (em polegadas)
-    private double targetX = 0;
-    private double targetY = 116;
+    private double targetX = 10;
+    private double targetY = 100;
 
     // Limites de Potência
     private double minPower = 0.2;
