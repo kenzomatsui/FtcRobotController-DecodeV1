@@ -82,6 +82,16 @@ public class ShooterObjBlue {
             indexer.setPower(0.6);
         }
     }
+    public void coletaAuto(boolean ain){
+        ElapsedTime timer = new ElapsedTime();
+        timer.reset();
+        if (ain){
+            while (timer.seconds() < 3.0) {
+                intake.setPower(-1);
+            }
+            intake.setPower(0);
+        }
+    }
 
     public void testMotor(){
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
