@@ -51,7 +51,7 @@ public class ProtTeleOpBlue extends OpMode {
         shooterController.init(hardwareMap, follower, SHOOTER_MOTOR);
         shooterController.setTargetPosition(targetX, targetY);
         // Configura: MinPower 0.35 a 24pol, MaxPower 0.9 a 120pol
-        shooterController.setPowerConfig(0.25, 0.90, 28.0, 120.0);
+        shooterController.setPowerConfig(0.4, 0.90, 20.0, 120.0);
 
         telemetry.addData("Status", "Inicializado. Pedro Pathing Ativo.");
         telemetry.update();

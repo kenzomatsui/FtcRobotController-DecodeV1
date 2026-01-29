@@ -20,12 +20,12 @@ public class PedroPathingShooterController {
     private double targetY = 100;
 
     // Limites de Potência
-    private double minPower = 0.2;
-    private double maxPower = 0.95;
+    private double minPower = 0.4;
+    private double maxPower = 0.9;
 
     // Distâncias de Referência (em polegadas)
     // Ajuste conforme os testes na arena
-    private double minDistance = 30.0; // Distância onde a potência é mínima (0.35)
+    private double minDistance = 20.0; // Distância onde a potência é mínima (0.35)
     private double maxDistance = 120.0; // Distância onde a potência é máxima (0.90)
 
     public void init(HardwareMap hardwareMap, Follower follower, String motorName) {
@@ -33,7 +33,7 @@ public class PedroPathingShooterController {
         this.shooterMotor = hardwareMap.get(DcMotorEx.class, motorName);
 
         // Shooter geralmente usa RUN_USING_ENCODER para manter velocidade constante
-        shooterMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        shooterMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         shooterMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
