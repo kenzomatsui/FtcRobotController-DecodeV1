@@ -34,6 +34,9 @@ public class PedroPathingMotorController {
     private double targetX = 10;
     private double targetY = 100;
 
+    private boolean isLocked = false;
+    private double lockedAngle = 0;
+
     // Redução Total 15:1 (28 ticks * 3 * 5 = 420)
     private static final double TICKS_PER_REV = 2100.0;
 
@@ -53,30 +56,46 @@ public class PedroPathingMotorController {
         this.targetX = x;
         this.targetY = y;
     }
+    public void lockAngle(double angle) {
+        this.lockedAngle = angle;
+        this.isLocked = true;
+    }
+
+    /**
+     * Libera a turret da trava de ângulo, voltando ao rastreio automático.
+     */
+    public void unlockAngle() {
+        this.isLocked = false;
+    }
 
     public void update() {
-        Pose currentPose = follower.getPose();
-
-        // 1. Calcular o ângulo absoluto do alvo em relação ao campo
-        double dx = targetX + currentPose.getX();
-        double dy = targetY + currentPose.getY();
-        double absoluteAngleToTarget = Math.toDegrees(Math.atan2(dy, dx));
-
-        // 2. Calcular o ângulo relativo ao robô
-        double robotHeading = Math.toDegrees(currentPose.getHeading());
-        double relativeTargetAngle = absoluteAngleToTarget - robotHeading;
-
-        // 3. Normalização Inteligente para Limites Estendidos
-        // Pegamos o ângulo atual do motor para encontrar o "alvo" mais próximo dentro da continuidade circular
         double currentMotorAngle = getMotorAngle();
+        double targetDegrees;
 
-        // Normaliza o erro para o intervalo [-180, 180] para encontrar o caminho mais curto
-        double error = relativeTargetAngle - (currentMotorAngle % 360);
-        while (error > 180) error -= 360;
-        while (error < -180) error += 360;
+        if (isLocked) {
+            // Se estiver travado, o alvo é o ângulo definido
+            targetDegrees = lockedAngle;
+        } else {
+            Pose currentPose = follower.getPose();
 
-        // O alvo real é a posição atual + o caminho mais curto
-        double targetDegrees = currentMotorAngle + error;
+
+            // 1. Calcular o ângulo absoluto do alvo em relação ao campo
+            double dx = targetX + currentPose.getX();
+            double dy = targetY + currentPose.getY();
+            double absoluteAngleToTarget = Math.toDegrees(Math.atan2(dy, dx));
+
+            // 2. Calcular o ângulo relativo ao robô
+            double robotHeading = Math.toDegrees(currentPose.getHeading());
+            double relativeTargetAngle = absoluteAngleToTarget - robotHeading;
+
+            // Normaliza o erro para o intervalo [-180, 180] para encontrar o caminho mais curto
+            double error = relativeTargetAngle - (currentMotorAngle % 360);
+            while (error > 180) error -= 360;
+            while (error < -180) error += 360;
+
+            // O alvo real é a posição atual + o caminho mais curto
+            targetDegrees = currentMotorAngle + error;
+        }
 
         // 4. Lógica de Zona: Travar nos limites
         // Agora o clip funciona corretamente mesmo para 300 graus
@@ -86,6 +105,7 @@ public class PedroPathingMotorController {
         double power = calculatePID(constrainedTargetDegrees, currentMotorAngle);
         motor.setPower(power);
     }
+
 
     private double calculatePID(double target, double current) {
         double error = target - current;

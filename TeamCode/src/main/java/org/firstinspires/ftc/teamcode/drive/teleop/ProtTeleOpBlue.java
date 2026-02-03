@@ -29,8 +29,8 @@ public class ProtTeleOpBlue extends OpMode {
 
 
     // Alvo inicial: gol azul
-    private double targetX = 0;
-    private double targetY = 114;
+    private double targetX = 0; // 6 é o verdadeiro (pro vermelho é 138 aqui)
+    private double targetY = 114; //138 é o verdadeiro
 
     public void init() {
         fod = new FieldOrientedDrive(hardwareMap);
@@ -69,6 +69,7 @@ public class ProtTeleOpBlue extends OpMode {
         turretController.update();
         shooterController.update();
         telemetry.addData("Power: ", shooterController.getCurrentPower()); //Alteração
+        telemetry.addData("Angle: ", turretController.getMotorAngle());
 
         telemetry.update();
     }

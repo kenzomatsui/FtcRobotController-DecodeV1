@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.util.Range;
  */
 public class PedroPathingShooterController {
     private Follower follower;
-    private DcMotorEx shooterMotor;
+    public DcMotorEx shooterMotor;
 
     // Coordenadas do Alvo (Poste/Cesta) no Campo (em polegadas)
     private double targetX = 10;
@@ -22,7 +22,6 @@ public class PedroPathingShooterController {
     // Limites de Potência
     private double minPower = 0.4;
     private double maxPower = 0.9;
-
     // Distâncias de Referência (em polegadas)
     // Ajuste conforme os testes na arena
     private double minDistance = 20.0; // Distância onde a potência é mínima (0.35)

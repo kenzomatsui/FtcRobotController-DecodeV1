@@ -21,7 +21,7 @@ public class ShooterObjBlue {
     public NormalizedColorSensor colorSensor;
     public View relativeLayout;
 
-    private DcMotorEx indexer, intake;
+    public DcMotorEx indexer, intake;
 
     public ShooterObjBlue(HardwareMap hardwareMap) {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
@@ -79,7 +79,8 @@ public class ShooterObjBlue {
                 indexer.setPower(1);
                 intake.setPower(-1);
             }
-            indexer.setPower(0.6);
+            indexer.setPower(0);
+            intake.setPower(0);
         }
     }
     public void coletaAuto(boolean ain){
