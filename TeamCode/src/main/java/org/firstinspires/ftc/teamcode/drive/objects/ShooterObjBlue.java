@@ -100,7 +100,7 @@ public class ShooterObjBlue {
         if (colors.green > 0.010){
             indexer.setPower(0);
         } else {
-            indexer.setPower(0.6);
+            indexer.setPower(0.8);
         }
     }
     public void Shoot(double trigger){
@@ -109,7 +109,7 @@ public class ShooterObjBlue {
         if (colors.green > 0.010){
             indexer.setPower(0);
         } else {
-            indexer.setPower(0.7);
+            indexer.setPower(0.8);
         }
         if (trigger>0.3){
             indexer.setPower(1);

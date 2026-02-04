@@ -21,16 +21,20 @@ public class ProtTeleOpBlue extends OpMode {
     private Follower follower;
     private PedroPathingMotorController turretController = new PedroPathingMotorController();
     private PedroPathingShooterController shooterController = new PedroPathingShooterController();
+    private final Pose startTeleop = new Pose(39, 80, Math.toRadians(0)); //pose pro inicio do teleop azul com o intake vira pra spike mark
+
 
 
     // Nomes de configuração
     private static final String MOTOR_NAME = "RMX";
     private static final String SHOOTER_MOTOR = "RMTa"; // Ajuste conforme seu hardware
 
+    private static int counter = 0;
+
 
     // Alvo inicial: gol azul
-    private double targetX = 0; // 6 é o verdadeiro (pro vermelho é 138 aqui)
-    private double targetY = 114; //138 é o verdadeiro
+    private double targetX = -6; // 6 é o verdadeiro (pro vermelho é 138 aqui)
+    private double targetY = -138; //138 é o verdadeiro
 
     public void init() {
         fod = new FieldOrientedDrive(hardwareMap);
@@ -39,8 +43,8 @@ public class ProtTeleOpBlue extends OpMode {
 
         // 1. Inicializar Pedro Pathing Follower
         // Certifique-se de que sua classe Constants está configurada corretamente
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(7, 7, 0)); // Ajuste conforme sua posição inicial
+        follower = Constants.createFollower(hardwareMap);// Ajuste conforme sua posição inicial
+        follower.setPose(startTeleop);
 
         // 2. Inicializar Controlador da Turret
         turretController.init(hardwareMap, follower, MOTOR_NAME);
@@ -51,25 +55,31 @@ public class ProtTeleOpBlue extends OpMode {
         shooterController.init(hardwareMap, follower, SHOOTER_MOTOR);
         shooterController.setTargetPosition(targetX, targetY);
         // Configura: MinPower 0.35 a 24pol, MaxPower 0.9 a 120pol
-        shooterController.setPowerConfig(0.4, 0.90, 20.0, 120.0);
+        shooterController.setPowerConfig(0.35, 0.95, 20.0, 110.0);
 
         telemetry.addData("Status", "Inicializado. Pedro Pathing Ativo.");
         telemetry.update();
     }
 
     public void loop() {
+        follower.update();
         fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_bumper);
-
         shooter.Shoot(gamepad1.right_trigger);
         shooter.SHOOTER3(gamepad1.a);
 
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
 
-        follower.update();
+        if (gamepad1.b && counter == 0){
+            follower.setPose(startTeleop);
+            counter++;
+        }
+
         turretController.update();
         shooterController.update();
         telemetry.addData("Power: ", shooterController.getCurrentPower()); //Alteração
         telemetry.addData("Angle: ", turretController.getMotorAngle());
+        telemetry.addData("Pose X: ", follower.getPose().getX());
+        telemetry.addData("Pose Y: ", follower.getPose().getY());
 
         telemetry.update();
     }

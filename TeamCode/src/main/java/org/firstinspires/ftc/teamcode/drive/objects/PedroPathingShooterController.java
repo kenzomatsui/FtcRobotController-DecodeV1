@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.drive.objects;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -16,8 +17,8 @@ public class PedroPathingShooterController {
     public DcMotorEx shooterMotor;
 
     // Coordenadas do Alvo (Poste/Cesta) no Campo (em polegadas)
-    private double targetX = 10;
-    private double targetY = 100;
+    private double targetX = 138;
+    private double targetY = 138;
 
     // Limites de Potência
     private double minPower = 0.4;
@@ -61,6 +62,8 @@ public class PedroPathingShooterController {
         // 1. Calcular a distância euclidiana até o alvo
         double dx = targetX + currentPose.getX();
         double dy = targetY + currentPose.getY();
+//        double dx = currentPose.getX() - targetX;
+//        double dy = currentPose.getY() - targetY;
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         // 2. Interpolação Linear da Potência

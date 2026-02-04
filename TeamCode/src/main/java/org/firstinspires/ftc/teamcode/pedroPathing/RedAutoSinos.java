@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingMotorController;
 import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingShooterController;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 
-@Autonomous(name = "NewBlueAuto", group = "Examples")
-public class ExampleAuto extends OpMode {
+@Autonomous(name = "Red Sinos", group = "Examples")
+public class RedAutoSinos extends OpMode {
 
 
     private PedroPathingMotorController turretController = new PedroPathingMotorController();
@@ -28,19 +28,19 @@ public class ExampleAuto extends OpMode {
     private static final String SHOOTER_MOTOR = "RMTa";
     boolean go;
 
-    private double targetX = 0;
+    private double targetX = 135;
     private double targetY = 135;
     private ShooterObjBlue shooter;
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     private int pathState;
-    private final Pose startPose = new Pose(39, 135, Math.toRadians(90)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(60, 86, Math.toRadians(180)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose pickup1Pose = new Pose(16, 86, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
-    private final Pose pickup2Pose = new Pose(16, 64, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark.
-    private final Pose pickup3Pose = new Pose(39, 80, Math.toRadians(180)); // Lowest (Third Set) of Artifacts from the Spike Mark.
-    private final Pose controlPoint = new Pose(65,55, Math.toRadians(180)); // Control Point for a Bezier curve on the second pickup
+    private final Pose startPose = new Pose(105, 135, Math.toRadians(90)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(84, 85, Math.toRadians(0)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose pickup1Pose = new Pose(128, 85, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose pickup2Pose = new Pose(128, 60, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark.
+    private final Pose pickup3Pose = new Pose(105, 80, Math.toRadians(0)); // Lowest (Third Set) of Artifacts from the Spike Mark.
+    private final Pose controlPoint = new Pose(79,55, Math.toRadians(0)); // Control Point for a Bezier curve on the second pickup
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3;
 
@@ -85,7 +85,7 @@ public class ExampleAuto extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(scorePreload);
+                follower.followPath(scorePreload, true);
                 shooterController.shooterMotor.setPower(0.8);
                 setPathState(10);
                 break;
@@ -105,9 +105,10 @@ public class ExampleAuto extends OpMode {
                 if(!follower.isBusy()) {
                     //coleta na primeira spike mark
                     shooter.intake.setPower(-1);
-                    shooterController.shooterMotor.setPower(0.8);
+                    shooterController.shooterMotor.setPower(0.7);
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup1,true);
+                    follower.followPath(grabPickup1,0.6,true);
+                    sleep(500);
                     setPathState(2);
                 }
                 break;
@@ -132,27 +133,37 @@ public class ExampleAuto extends OpMode {
             case 3:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
+                    shooter.intake.setPower(-1);
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup2);
+                    follower.followPath(grabPickup2,0.6,true);
                     setPathState(4);
                 }
                 break;
             case 4:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
                 if(!follower.isBusy()) {
+                    shooter.intake.setPower(0);
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
                     follower.followPath(scorePickup2);
-                    setPathState(5);
+                    setPathState(12);
                 }
                 break;
+            case 12:
+                if (!follower.isBusy()){
+                    shooter.indexer.setPower(1);
+                    shooter.intake.setPower(-1);
+                    sleep(2000);
+                    shooter.indexer.setPower(0);
+                    setPathState(5);
+                }
             case 5:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup3,0.3,true);
+                    follower.followPath(grabPickup3,1,true);
                     setPathState(6);
                 }
                 break;
@@ -174,7 +185,7 @@ public class ExampleAuto extends OpMode {
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
     @Override
     public void loop() {
-        turretController.lockAngle(-45);
+        turretController.lockAngle(45);
         shooter.testMotor();
 
 
