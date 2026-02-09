@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 import org.firstinspires.ftc.teamcode.pedroPathingVelho.Constants;
 
 @TeleOp
-public class ProtTeleOpBlue extends OpMode {
+public class ProtTeleOpRedFix extends OpMode {
     FieldOrientedDrive fod;
     ShooterObjBlue shooter;
     Intake intake;
@@ -21,7 +21,7 @@ public class ProtTeleOpBlue extends OpMode {
     private Follower follower;
     private PedroPathingMotorController turretController = new PedroPathingMotorController();
     private PedroPathingShooterController shooterController = new PedroPathingShooterController();
-    private final Pose startTeleop = new Pose(39, 80, Math.toRadians(0)); //pose pro inicio do teleop azul com o intake vira pra spike mark
+    private final Pose startTeleop = new Pose(105, 80, Math.toRadians(180)); //pose pro inicio do teleop vermelho com o intake vira pra spike mark
 
 
 
@@ -29,16 +29,14 @@ public class ProtTeleOpBlue extends OpMode {
     private static final String MOTOR_NAME = "RMX";
     private static final String SHOOTER_MOTOR = "RMTa"; // Ajuste conforme seu hardware
 
+    private static int counter = 0;
 
 
     // Alvo inicial: gol azul
-    private double targetX = -6; // 6 é o verdadeiro (pro vermelho é 138 aqui)
+    private double targetX = -138; // 6 é o verdadeiro (pro vermelho é 138 aqui)
     private double targetY = -138; //138 é o verdadeiro
 
     public void init() {
-        if (gamepad1.x){
-            shooterController.shooterMotor.setPower(0.68);
-        }
         fod = new FieldOrientedDrive(hardwareMap);
         shooter = new ShooterObjBlue(hardwareMap);
         intake = new Intake(hardwareMap);
@@ -64,23 +62,27 @@ public class ProtTeleOpBlue extends OpMode {
     }
 
     public void loop() {
+        if (gamepad1.x){
+            shooterController.shooterMotor.setPower(0.68);
+        }
         follower.update();
         fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_bumper);
         shooter.Shoot(gamepad1.right_trigger);
 
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
 
+        shooterController.shooterMotor.setPower(0.68);
+
         if (gamepad1.b){
             follower.setPose(startTeleop);
         }
         boolean shooterlock = gamepad1.a;
         if (shooterlock){
-            shooterController.shooterMotor.setPower(0.68);
             turretController.lockAngle(-45);
         }
 
-        turretController.update();
-        shooterController.update();
+        //turretController.update();
+        //shooterController.update();
         telemetry.addData("Power: ", shooterController.getCurrentPower()); //Alteração
         telemetry.addData("Angle: ", turretController.getMotorAngle());
         telemetry.addData("Pose X: ", follower.getPose().getX());

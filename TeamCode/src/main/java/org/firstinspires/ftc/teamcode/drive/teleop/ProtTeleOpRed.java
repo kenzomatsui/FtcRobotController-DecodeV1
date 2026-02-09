@@ -55,23 +55,29 @@ public class ProtTeleOpRed extends OpMode {
         shooterController.init(hardwareMap, follower, SHOOTER_MOTOR);
         shooterController.setTargetPosition(targetX, targetY);
         // Configura: MinPower 0.35 a 24pol, MaxPower 0.9 a 120pol
-        shooterController.setPowerConfig(0.35, 0.95, 20.0, 110.0);
+        shooterController.setPowerConfig(0.35, 0.9, 20.0, 115.0);
 
         telemetry.addData("Status", "Inicializado. Pedro Pathing Ativo.");
         telemetry.update();
     }
 
     public void loop() {
+        if (gamepad1.x){
+            shooterController.shooterMotor.setPower(0.68);
+        }
         follower.update();
         fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_bumper);
         shooter.Shoot(gamepad1.right_trigger);
-        shooter.SHOOTER3(gamepad1.a);
 
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
 
-        if (gamepad1.b && counter == 0){
+        if (gamepad1.b){
             follower.setPose(startTeleop);
-            counter++;
+        }
+        boolean shooterlock = gamepad1.a;
+        if (shooterlock){
+            shooterController.shooterMotor.setPower(0.68);
+            turretController.lockAngle(-45);
         }
 
         turretController.update();

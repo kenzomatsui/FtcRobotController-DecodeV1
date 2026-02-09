@@ -35,7 +35,7 @@ public class RedAutoSinos extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     private int pathState;
-    private final Pose startPose = new Pose(105, 135, Math.toRadians(90)); // Start Pose of our robot.
+    private final Pose startPose = new Pose(107, 134, Math.toRadians(90)); // Start Pose of our robot.
     private final Pose scorePose = new Pose(84, 85, Math.toRadians(0)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose pickup1Pose = new Pose(128, 85, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose pickup2Pose = new Pose(128, 60, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark.

@@ -26,7 +26,6 @@ public class BlueAutoSinos extends OpMode {
     private PedroPathingShooterController shooterController = new PedroPathingShooterController();
     private static final String MOTOR_NAME = "RMX";
     private static final String SHOOTER_MOTOR = "RMTa";
-    boolean go;
 
     private double targetX = 0;
     private double targetY = 135;
@@ -35,7 +34,7 @@ public class BlueAutoSinos extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
 
     private int pathState;
-    private final Pose startPose = new Pose(39, 135, Math.toRadians(90)); // Start Pose of our robot.
+    private final Pose startPose = new Pose(37, 134, Math.toRadians(90)); // Start Pose of our robot.
     private final Pose scorePose = new Pose(60, 85, Math.toRadians(180)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose pickup1Pose = new Pose(16, 85, Math.toRadians(180)); // Highest (First Set) of Artifacts from the Spike Mark.
     private final Pose pickup2Pose = new Pose(16, 60, Math.toRadians(180)); // Middle (Second Set) of Artifacts from the Spike Mark.
@@ -85,6 +84,7 @@ public class BlueAutoSinos extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+                turretController.lockAngle(-45);
                 follower.followPath(scorePreload, true);
                 shooterController.shooterMotor.setPower(0.8);
                 setPathState(10);
@@ -168,7 +168,6 @@ public class BlueAutoSinos extends OpMode {
                 }
                 break;
             case 6:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
                     /* Set the state to a Case we won't use or define, so it just stops running an new paths */
                     setPathState(-1);

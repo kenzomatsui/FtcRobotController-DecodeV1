@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
 import org.firstinspires.ftc.teamcode.pedroPathingVelho.Constants;
 
 @TeleOp
-public class ProtTeleOpBlue extends OpMode {
+public class ProtTeleOpBlueFix extends OpMode {
     FieldOrientedDrive fod;
     ShooterObjBlue shooter;
     Intake intake;
@@ -67,20 +67,19 @@ public class ProtTeleOpBlue extends OpMode {
         follower.update();
         fod.movement(-gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x, gamepad1.left_bumper);
         shooter.Shoot(gamepad1.right_trigger);
+        shooterController.shooterMotor.setPower(0.68);
 
         intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
 
         if (gamepad1.b){
             follower.setPose(startTeleop);
         }
-        boolean shooterlock = gamepad1.a;
-        if (shooterlock){
-            shooterController.shooterMotor.setPower(0.68);
+        if (gamepad1.a){
             turretController.lockAngle(-45);
         }
 
-        turretController.update();
-        shooterController.update();
+        //turretController.update();
+        //shooterController.update();
         telemetry.addData("Power: ", shooterController.getCurrentPower()); //Alteração
         telemetry.addData("Angle: ", turretController.getMotorAngle());
         telemetry.addData("Pose X: ", follower.getPose().getX());
