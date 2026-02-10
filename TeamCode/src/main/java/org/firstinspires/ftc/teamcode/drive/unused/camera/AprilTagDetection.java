@@ -1,36 +1,44 @@
-package org.firstinspires.ftc.teamcode.drive.autonomus;
+package org.firstinspires.ftc.teamcode.drive.unused.camera;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
+
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@Autonomous(name = "Move10_Straf10_Turn180", group = "Autonomous")
 @Disabled
-public class AutonomoEncoder extends LinearOpMode {
+@Autonomous(name = "AlignAprilTag_SideCamera", group = "Autonomous")
+public class AprilTagDetection extends LinearOpMode {
 
     private DcMotor frontLeft, frontRight, backLeft, backRight;
     private IMU imu;
+    private Limelight3A limelight;
 
-    static final double TICKS_PER_CM = 17.82; // Para rodas mecanum de 96mm
+    static final double TICKS_PER_CM = 17.82;
     static final double TURN_TOLERANCE = 2.0; // graus de margem de erro
+
 
     @Override
     public void runOpMode() {
-        // Inicialização do hardware
         frontLeft = hardwareMap.get(DcMotor.class, "FL");
         frontRight = hardwareMap.get(DcMotor.class, "FR");
         backLeft = hardwareMap.get(DcMotor.class, "BL");
         backRight = hardwareMap.get(DcMotor.class, "BR");
 
-        imu = hardwareMap.get(IMU.class,"imu");
-        IMU.Parameters myIMUparameters;
-        myIMUparameters = new IMU.Parameters(new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
-        imu.initialize(myIMUparameters);
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(
+                new RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
 
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.REVERSE);
@@ -40,19 +48,20 @@ public class AutonomoEncoder extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            //moveCM(10, 0.4);        // 10 cm para frente
-            //strafeCM(-10, 0.4);     // 10 cm para esquerda
-            //turnToAngle(180);       // virar 180 graus
+            LLResult result = limelight.getLatestResult();
+
+            if (result != null && result.isValid()) {
+                double tx = result.getTx(); // deslocamento lateral em graus (para strafe)
+                double ta = result.getTa(); // tamanho da tag = aproximação
+            }
         }
     }
-
     private void resetEncoders() {
         for (DcMotor m : new DcMotor[]{frontLeft, frontRight, backLeft, backRight}) {
             m.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             m.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
-
     private void moveCM(double cm, double power) {
         int ticks = (int) (cm * TICKS_PER_CM);
 
@@ -68,7 +77,7 @@ public class AutonomoEncoder extends LinearOpMode {
 
         while (opModeIsActive() &&
                 (frontLeft.isBusy() || frontRight.isBusy() || backLeft.isBusy() || backRight.isBusy())) {
-            telemetry.addLine("Movendo para frente...");
+            telemetry.addLine("Movendo...");
             telemetry.update();
         }
 
@@ -96,7 +105,6 @@ public class AutonomoEncoder extends LinearOpMode {
 
         stopAllMotors();
     }
-
     private void turnToAngle(double targetAngle) {
         double currentYaw = getYaw();
         double error = angleDiff(targetAngle, currentYaw);
@@ -122,7 +130,7 @@ public class AutonomoEncoder extends LinearOpMode {
             telemetry.update();
 
         }
-    stopAllMotors();
+        stopAllMotors();
     }
 
     private double getYaw() {
@@ -142,3 +150,4 @@ public class AutonomoEncoder extends LinearOpMode {
         }
     }
 }
+
