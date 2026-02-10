@@ -8,11 +8,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.drive.objects.Intake;
+import org.firstinspires.ftc.teamcode.drive.unused.Intake;
 import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingMotorController;
 import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingShooterController;
 import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
-import org.firstinspires.ftc.teamcode.pedroPathingVelho.Constants;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "Blue Auto SK", group = "Autonomous")
 public class BlueAutoSk extends OpMode {

@@ -21,7 +21,7 @@ public class ProtTeleOpBlue extends OpMode {
     private Follower follower;
     private PedroPathingMotorController turretController = new PedroPathingMotorController();
     private PedroPathingShooterController shooterController = new PedroPathingShooterController();
-    private final Pose startTeleop = new Pose(39, 80, Math.toRadians(0)); //pose pro inicio do teleop azul com o intake vira pra spike mark
+    private final Pose startTeleop = new Pose(39, 80, Math.toRadians(180)); //pose pro inicio do teleop azul com o intake vira pra spike mark
 
 
 
@@ -32,8 +32,8 @@ public class ProtTeleOpBlue extends OpMode {
 
 
     // Alvo inicial: gol azul
-    private double targetX = -6; // 6 é o verdadeiro (pro vermelho é 138 aqui)
-    private double targetY = -138; //138 é o verdadeiro
+    private double targetX = 6; // 6 é o verdadeiro (pro vermelho é 138 aqui)
+    private double targetY = 138; //138 é o verdadeiro
 
     public void init() {
         if (gamepad1.x){
