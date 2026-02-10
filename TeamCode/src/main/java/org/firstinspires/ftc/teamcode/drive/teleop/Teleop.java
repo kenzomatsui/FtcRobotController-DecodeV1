@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
-import org.firstinspires.ftc.teamcode.drive.objects.Intake;
+import org.firstinspires.ftc.teamcode.drive.unused.Intake;
 import org.firstinspires.ftc.teamcode.drive.unused.Outtake;
 
 import java.util.concurrent.TimeUnit;

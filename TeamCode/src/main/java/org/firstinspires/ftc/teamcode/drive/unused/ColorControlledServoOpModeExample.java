@@ -1,10 +1,8 @@
-package org.firstinspires.ftc.teamcode.drive.actuators;
+package org.firstinspires.ftc.teamcode.drive.unused;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.teamcode.drive.objects.ColorControlledServo;
 
 /**
  * Exemplo de OpMode para demonstrar o uso da classe ColorControlledServo.
