@@ -21,7 +21,7 @@ public class ProtTeleOpBlue extends OpMode {
     private Follower follower;
     private PedroPathingMotorController turretController = new PedroPathingMotorController();
     private PedroPathingShooterController shooterController = new PedroPathingShooterController();
-    private final Pose startTeleop = new Pose(39, 80, Math.toRadians(180)); //pose pro inicio do teleop azul com o intake vira pra spike mark
+    private final Pose startTeleop = new Pose(72, 72, Math.toRadians(0)); //pose pro inicio do teleop azul com o intake vira pra spike mark
 
 
 
@@ -36,9 +36,6 @@ public class ProtTeleOpBlue extends OpMode {
     private double targetY = 138; //138 é o verdadeiro
 
     public void init() {
-        if (gamepad1.x){
-            shooterController.shooterMotor.setPower(0.68);
-        }
         fod = new FieldOrientedDrive(hardwareMap);
         shooter = new ShooterObjBlue(hardwareMap);
         intake = new Intake(hardwareMap);
@@ -72,11 +69,6 @@ public class ProtTeleOpBlue extends OpMode {
 
         if (gamepad1.b){
             follower.setPose(startTeleop);
-        }
-        boolean shooterlock = gamepad1.a;
-        if (shooterlock){
-            shooterController.shooterMotor.setPower(0.68);
-            turretController.lockAngle(-45);
         }
 
         turretController.update();

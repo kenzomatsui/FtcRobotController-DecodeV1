@@ -44,7 +44,7 @@ public class PedroPathingMotorController {
         this.follower = follower;
         this.motor = hardwareMap.get(DcMotorEx.class, motorName);
 
-        //motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -80,8 +80,8 @@ public class PedroPathingMotorController {
 
 
             // 1. Calcular o ângulo absoluto do alvo em relação ao campo
-            double dx = targetX + currentPose.getX();
-            double dy = targetY + currentPose.getY();
+            double dx = targetX - currentPose.getX();
+            double dy = targetY - currentPose.getY();
             double absoluteAngleToTarget = Math.toDegrees(Math.atan2(dy, dx));
 
             // 2. Calcular o ângulo relativo ao robô

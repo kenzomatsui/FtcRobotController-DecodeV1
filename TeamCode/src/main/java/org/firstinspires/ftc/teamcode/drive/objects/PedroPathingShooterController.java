@@ -17,7 +17,7 @@ public class PedroPathingShooterController {
     public DcMotorEx shooterMotor;
 
     // Coordenadas do Alvo (Poste/Cesta) no Campo (em polegadas)
-    private double targetX = 138;
+    private double targetX = 6;
     private double targetY = 138;
 
     // Limites de Potência
@@ -60,10 +60,8 @@ public class PedroPathingShooterController {
         Pose currentPose = follower.getPose();
 
         // 1. Calcular a distância euclidiana até o alvo
-        double dx = targetX + currentPose.getX();
-        double dy = targetY + currentPose.getY();
-//        double dx = currentPose.getX() - targetX;
-//        double dy = currentPose.getY() - targetY;
+        double dx = targetX - currentPose.getX();
+        double dy = targetY - currentPose.getY();
         double distance = Math.sqrt(dx * dx + dy * dy);
 
         // 2. Interpolação Linear da Potência
