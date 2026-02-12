@@ -27,6 +27,7 @@ public class PedroPathingShooterController {
     // Ajuste conforme os testes na arena
     private double minDistance = 20.0; // Distância onde a potência é mínima (0.35)
     private double maxDistance = 120.0; // Distância onde a potência é máxima (0.90)
+    private double TICKS_PER_REV = 28;
 
     public void init(HardwareMap hardwareMap, Follower follower, String motorName) {
         this.follower = follower;
@@ -89,6 +90,11 @@ public class PedroPathingShooterController {
 
     public double getCurrentPower() {
         return shooterMotor.getPower();
+    }
+    public double getCurrentRPM(){
+        double ticksPerSecond = shooterMotor.getVelocity();
+        double currentRPM = (ticksPerSecond/TICKS_PER_REV)*60;
+        return currentRPM;
     }
 
     public void stop() {

@@ -21,7 +21,7 @@ public class ProtTeleOpBlue extends OpMode {
     private Follower follower;
     private PedroPathingMotorController turretController = new PedroPathingMotorController();
     private PedroPathingShooterController shooterController = new PedroPathingShooterController();
-    private final Pose startTeleop = new Pose(72, 72, Math.toRadians(0)); //pose pro inicio do teleop azul com o intake vira pra spike mark
+    private final Pose startTeleop = new Pose(39, 80, Math.toRadians(180)); //pose pro inicio do teleop azul com o intake vira pra spike mark
 
 
 
@@ -54,7 +54,7 @@ public class ProtTeleOpBlue extends OpMode {
         shooterController.init(hardwareMap, follower, SHOOTER_MOTOR);
         shooterController.setTargetPosition(targetX, targetY);
         // Configura: MinPower 0.35 a 24pol, MaxPower 0.9 a 120pol
-        shooterController.setPowerConfig(0.35, 0.9, 20.0, 115.0);
+        shooterController.setPowerConfig(0.35, 0.9, 20.0, 120.0);
 
         telemetry.addData("Status", "Inicializado. Pedro Pathing Ativo.");
         telemetry.update();
@@ -73,7 +73,8 @@ public class ProtTeleOpBlue extends OpMode {
 
         turretController.update();
         shooterController.update();
-        telemetry.addData("Power: ", shooterController.getCurrentPower()); //Alteração
+        telemetry.addData("Power: ", shooterController.getCurrentPower());
+        telemetry.addData("RPM: ", shooterController.getCurrentRPM()); // testar
         telemetry.addData("Angle: ", turretController.getMotorAngle());
         telemetry.addData("Pose X: ", follower.getPose().getX());
         telemetry.addData("Pose Y: ", follower.getPose().getY());
