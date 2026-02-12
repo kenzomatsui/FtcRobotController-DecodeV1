@@ -11,12 +11,10 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingMotorController;
-import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingShooterController;
-import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
+import org.firstinspires.ftc.teamcode.Davi.drive.objects.PedroPathingMotorController;
+import org.firstinspires.ftc.teamcode.Davi.drive.objects.PedroPathingShooterController;
+import org.firstinspires.ftc.teamcode.Davi.drive.objects.ShooterObjBlue;
 
 @Autonomous(name = "Red Sinos", group = "Examples")
 public class RedAutoSinos extends OpMode {

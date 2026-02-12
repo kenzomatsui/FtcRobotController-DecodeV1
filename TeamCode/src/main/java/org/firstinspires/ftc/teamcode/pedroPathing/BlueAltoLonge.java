@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.drive.objects.PedroPathingShooterController;
-import org.firstinspires.ftc.teamcode.drive.objects.ShooterObjBlue;
+import org.firstinspires.ftc.teamcode.Davi.drive.objects.ShooterObjBlue;
 
 @Autonomous
 public class BlueAltoLonge extends OpMode {

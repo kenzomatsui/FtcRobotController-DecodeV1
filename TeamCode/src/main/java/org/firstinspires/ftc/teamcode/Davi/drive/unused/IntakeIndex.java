@@ -1,0 +1,21 @@
+package org.firstinspires.ftc.teamcode.Davi.drive.unused;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.Davi.drive.objects.ShooterObjBlue;
+@TeleOp
+@Disabled
+public class IntakeIndex extends OpMode {
+    Intake intake;
+    ShooterObjBlue shooter;
+
+    public void init(){
+        intake = new Intake(hardwareMap);
+        shooter = new ShooterObjBlue(hardwareMap);
+    }
+    public void loop(){
+        intake.Coleta(-gamepad1.left_trigger, -gamepad1.right_trigger);
+    }
+}
