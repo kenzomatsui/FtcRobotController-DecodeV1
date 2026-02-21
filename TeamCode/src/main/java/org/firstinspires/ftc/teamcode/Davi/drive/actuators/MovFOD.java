@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Davi.drive.objects.FieldOrientedDrive;
 
-@Disabled
 @TeleOp
 public class MovFOD extends OpMode {
     FieldOrientedDrive fod;

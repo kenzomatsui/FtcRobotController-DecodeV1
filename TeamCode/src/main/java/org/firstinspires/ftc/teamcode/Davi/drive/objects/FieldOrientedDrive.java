@@ -39,7 +39,7 @@ public class FieldOrientedDrive {
         // Define os parâmetros de inicialização da IMU, especificando a orientação física do hub Rev no robô.
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                RevHubOrientationOnRobot.UsbFacingDirection.UP
         ));
         // Inicializa a IMU com os parâmetros definidos.
         imu.initialize(parameters);
