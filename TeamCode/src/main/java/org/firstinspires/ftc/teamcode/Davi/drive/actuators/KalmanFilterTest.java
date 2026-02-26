@@ -10,19 +10,21 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @TeleOp
 public class KalmanFilterTest extends OpMode {
     private Follower follower;
     private Limelight3A limelight;
+    LimeLight3AgetDistance LL = new LimeLight3AgetDistance();
+    private final ElapsedTime timer = new ElapsedTime();
+    private final Pose startPose = new Pose(72, 72, Math.toRadians(0)); //pose pro inicio do teleop azul com o intake vira pra spike mark
+
+
+
     public void init(){
-        this.follower = follower;
+        follower = Constants.createFollower(hardwareMap);
+
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         telemetry.setMsTransmissionInterval(11);
         limelight.pipelineSwitch(0);
@@ -35,43 +37,39 @@ public class KalmanFilterTest extends OpMode {
 
     }
     public void loop(){
+
+        follower.update();
+
         Pose currentPose = follower.getPose();
-
         LLResult result = limelight.getLatestResult();
-
-        ElapsedTime timer = new ElapsedTime();
 
         double maxConfidencePP = 1.0;
         double minConfidencePP = 0.2;
+        double decayTime = 20.0;
 
-        double confidencePP = 0;
+        double confidencePP = maxConfidencePP - (timer.seconds() / decayTime);
+        confidencePP = Math.max(confidencePP, minConfidencePP);
+
         double confidenceLL = 0;
-        double time = timer.seconds();
 
-        // Decaimento linear do PP (ex: em 5 segundos ele cai pro mínimo)
-        double decayTime = 30.0;
-
-        confidencePP = maxConfidencePP - (time / decayTime);
-
-        if (confidencePP < minConfidencePP) {
-            confidencePP = minConfidencePP;
-        }
-        if (result.isValid()) {
-
-            timer.reset();  // reseta o tempo
-
+        if (result != null && result.isValid()) {
+            timer.reset();
             confidenceLL = 1.0;
         }
+
         double total = confidencePP + confidenceLL;
+        if (total <= 0.0001) total = 1;
 
         double weightPP = confidencePP / total;
         double weightLL = confidenceLL / total;
 
-        //double finalDistance = ;
-        double dxpp = currentPose.getX() * weightPP;
-        double dypp = currentPose.getY() * weightPP;
-        double dwpp = Math.sqrt(dypp * dypp + dxpp * dxpp);
-        double dwLL = ;
-        //double finalHeading = (ppHeading * weightPP) + (llHeading * weightLL);
+        double finalX = (currentPose.getX() * weightPP) + (LL.getLLX() * weightLL);
+        double finalY = (currentPose.getY() * weightPP) + (LL.getLLY() * weightLL);
+        double finalW = Math.sqrt(finalY * finalY + finalX * finalX);
+
+        telemetry.addData("Final X", finalX);
+        telemetry.addData("Final Y", finalY);
+        telemetry.addData("Final W", finalW);
+        telemetry.update();
     }
 }
